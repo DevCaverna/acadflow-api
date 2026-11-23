@@ -9,5 +9,3 @@ Docker Compose tem projeto isolado, nenhum mapeamento de porta 5432 e remove vol
 
 Proteger develop, staging e main com PR obrigatório, ao menos 1 review e checks API / Validate e API / Build. Workflow sozinho não protege branch.
 Sem deploy automático por enquanto. Migrations de produção exigem uma futura etapa protegida e serializada.
-
-Aviso: scaffolding em PR Draft. Não há lockfile, dependências Nest/Vitest/TypeORM e implementação completa. É esperado que CI falhe até concluir o bootstrap e testar as suites.

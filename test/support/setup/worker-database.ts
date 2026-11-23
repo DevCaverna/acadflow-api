@@ -9,7 +9,12 @@ export function getWorkerDatabaseName(): string {
   const workerId = Number(process.env.VITEST_POOL_ID ?? 1);
   const workers = Number(process.env.TEST_WORKERS ?? 4);
   const prefix = process.env.TEST_DB_PREFIX ?? 'acadflow_test';
-  if (!Number.isInteger(workerId) || workerId < 1 || workerId > workers || !/^[a-z][a-z0-9_]*$/.test(prefix)) {
+  if (
+    !Number.isInteger(workerId) ||
+    workerId < 1 ||
+    workerId > workers ||
+    !/^[a-z][a-z0-9_]*$/.test(prefix)
+  ) {
     throw new Error('Invalid Vitest worker or test database prefix');
   }
   return `${prefix}_${workerId}`;

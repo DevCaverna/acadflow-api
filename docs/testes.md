@@ -2,21 +2,21 @@
 
 Vitest + Supertest. PostgreSQL 17 temporário via Docker para integração e E2E.
 
-| Tipo | Arquivos | Banco |
-| --- | --- | --- |
-| Unitário | `src/**/*.spec.ts` | Não usa; dependências mockadas |
+| Tipo       | Arquivos                            | Banco                            |
+| ---------- | ----------------------------------- | -------------------------------- |
+| Unitário   | `src/**/*.spec.ts`                  | Não usa; dependências mockadas   |
 | Integração | `test/integration/**/*.int-spec.ts` | Temporário, com migrations reais |
-| E2E | `test/e2e/**/*.e2e-spec.ts` | Temporário, HTTP com Supertest |
+| E2E        | `test/e2e/**/*.e2e-spec.ts`         | Temporário, HTTP com Supertest   |
 
 ## Comandos
 
-| Comando | O que faz |
-| --- | --- |
-| `pnpm test:unit` / `pnpm test:unit:watch` | Unitários, sem Docker |
-| `pnpm test:docker [1..4]` | Integração e E2E |
-| `pnpm test:integration:docker [1..4]` | Só integração |
-| `pnpm test:e2e:docker [1..4]` | Só E2E |
-| `pnpm test:cov` | Cobertura dos unitários |
+| Comando                                   | O que faz               |
+| ----------------------------------------- | ----------------------- |
+| `pnpm test:unit` / `pnpm test:unit:watch` | Unitários, sem Docker   |
+| `pnpm test:docker [1..4]`                 | Integração e E2E        |
+| `pnpm test:integration:docker [1..4]`     | Só integração           |
+| `pnpm test:e2e:docker [1..4]`             | Só E2E                  |
+| `pnpm test:cov`                           | Cobertura dos unitários |
 
 ## Como funciona
 

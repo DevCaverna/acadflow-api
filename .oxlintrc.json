@@ -1,11 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "typescript",
-    "import",
-    "unicorn",
-    "oxc"
-  ],
+  "plugins": ["typescript", "import", "unicorn", "oxc"],
   "env": {
     "node": true,
     "vitest": true
@@ -18,19 +13,12 @@
       {
         "patterns": [
           {
-            "group": [
-              "./*",
-              "../*"
-            ],
+            "group": ["./*", "../*"],
             "message": "Use aliases @/ em vez de imports relativos para módulos internos."
           }
         ]
       }
     ]
   },
-  "ignorePatterns": [
-    "node_modules",
-    "dist",
-    "coverage"
-  ]
+  "ignorePatterns": ["node_modules", "dist", "coverage"]
 }

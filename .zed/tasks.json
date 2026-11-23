@@ -2,71 +2,51 @@
   {
     "label": "🚀 API Dev",
     "command": "pnpm",
-    "args": [
-      "start:dev"
-    ]
+    "args": ["start:dev"]
   },
   {
     "label": "📦 Build",
     "command": "pnpm",
-    "args": [
-      "build"
-    ]
+    "args": ["build"]
   },
   {
     "label": "🔍 Oxlint",
     "command": "pnpm",
-    "args": [
-      "lint"
-    ]
+    "args": ["lint"]
   },
   {
     "label": "🛠️ Oxlint Fix",
     "command": "pnpm",
-    "args": [
-      "lint:fix"
-    ]
+    "args": ["lint:fix"]
   },
   {
     "label": "✨ Oxfmt",
     "command": "pnpm",
-    "args": [
-      "format"
-    ]
+    "args": ["format"]
   },
   {
     "label": "✅ Oxfmt Check",
     "command": "pnpm",
-    "args": [
-      "format:check"
-    ]
+    "args": ["format:check"]
   },
   {
     "label": "🔎 Typecheck",
     "command": "pnpm",
-    "args": [
-      "typecheck"
-    ]
+    "args": ["typecheck"]
   },
   {
     "label": "🧪 Tests",
     "command": "pnpm",
-    "args": [
-      "test"
-    ]
+    "args": ["test"]
   },
   {
     "label": "🗂️ Migrations Show",
     "command": "pnpm",
-    "args": [
-      "migration:show"
-    ]
+    "args": ["migration:show"]
   },
   {
     "label": "✅ PR Check",
     "command": "pnpm",
-    "args": [
-      "pr"
-    ]
+    "args": ["pr"]
   }
 ]

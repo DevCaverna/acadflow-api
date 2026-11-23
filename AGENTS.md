@@ -100,8 +100,6 @@ scripts/
 
 ## 8. Comandos e qualidade
 
-> Os scripts abaixo são o contrato de desenvolvimento **a ser implementado e validado no bootstrap** no `package.json`.
-
 ```bash
 pnpm install
 pnpm start:dev

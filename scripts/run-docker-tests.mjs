@@ -3,7 +3,12 @@ import { existsSync } from 'node:fs';
 
 const suite = process.argv[2] ?? 'all';
 const count = Number(process.argv[3] ?? process.env.TEST_WORKERS ?? 4);
-if (!['all', 'integration', 'e2e'].includes(suite) || !Number.isInteger(count) || count < 1 || count > 4) {
+if (
+  !['all', 'integration', 'e2e'].includes(suite) ||
+  !Number.isInteger(count) ||
+  count < 1 ||
+  count > 4
+) {
   console.error('Usage: pnpm test:docker [1..4] | pnpm test:integration:docker [1..4]');
   process.exit(2);
 }
@@ -17,7 +22,16 @@ try {
   const up = call(['up', '-d', '--wait', 'postgres']);
   if (up.error) throw up.error;
   if (up.status !== 0) throw new Error('Test database did not start');
-  const run = call(['run', '--build', '--rm', '-e', `TEST_WORKERS=${count}`, '-e', `TEST_SUITE=${suite}`, 'test-runner']);
+  const run = call([
+    'run',
+    '--build',
+    '--rm',
+    '-e',
+    `TEST_WORKERS=${count}`,
+    '-e',
+    `TEST_SUITE=${suite}`,
+    'test-runner',
+  ]);
   if (run.error) throw run.error;
   exitCode = run.status ?? 1;
 } catch (error) {

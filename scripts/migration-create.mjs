@@ -7,6 +7,10 @@ if (!name || !/^[A-Za-z][A-Za-z0-9_-]*$/.test(name)) {
 }
 
 const binary = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
-const result = spawnSync(binary, ['exec', 'typeorm', 'migration:create', `src/database/migrations/${name}`], { stdio: 'inherit' });
+const result = spawnSync(
+  binary,
+  ['exec', 'typeorm', 'migration:create', `src/database/migrations/${name}`],
+  { stdio: 'inherit' },
+);
 if (result.error) console.error(result.error.message);
 process.exit(result.status ?? 1);

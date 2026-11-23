@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-test-only-change-me}
       POSTGRES_DB: postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d postgres']
       interval: 2s
       timeout: 3s
       retries: 20
@@ -35,17 +35,10 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-local-test-only-change-me}
       DB_DATABASE: acadflow_test_1
       JWT_SECRET: test-only-do-not-use-in-production
-    volumes:
-      - ..:/workspace
-      - test_node_modules:/workspace/node_modules
     command: >
-      sh -lc "pnpm install --frozen-lockfile &&
-      node test/support/setup/prepare-test-dbs.mjs &&
+      sh -lc "node test/support/setup/prepare-test-dbs.mjs &&
       node scripts/run-vitest-suites.mjs"
     networks: [testnet]
 
 networks:
   testnet:
-
-volumes:
-  test_node_modules:

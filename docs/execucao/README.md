@@ -1,7 +1,5 @@
 # Como executar o AcadFlow API
 
-> Os comandos passam a valer **depois** de o bootstrap NestJS/TypeORM/`pnpm-lock.yaml` e os Dockerfiles estarem implementados e validados.
-
 ## Pré-requisitos
 
 - Node.js **24** e pnpm **12.4.2**, ou Docker Engine com Compose v2.
@@ -19,7 +17,7 @@ pnpm migration:run
 pnpm start:dev
 ```
 
-A API estará em `http://localhost:3000` (salvo configuração diversa). A migration é uma ação explícita: não rodar `migration:run` indiscriminadamente sem confirmar o banco.
+A API estará em `http://localhost:3000` (salvo configuração diversa). Swagger em `/docs` e estado da API e do banco em `/health` (`503` se o banco estiver indisponível). A migration é uma ação explícita: não rodar `migration:run` indiscriminadamente sem confirmar o banco.
 
 ## Rodar API e PostgreSQL pelo Docker
 
@@ -69,7 +67,7 @@ pnpm test:unit
 pnpm build
 ```
 
-O CI também precisa executar os testes de integração/E2E isolados. Se um comando ainda não existir ou falhar por dependências ausentes, isso significa que o bootstrap está pendente: não declarar sucesso fictício.
+O CI também executa os testes de integração e E2E isolados.
 
 ## Problemas comuns
 

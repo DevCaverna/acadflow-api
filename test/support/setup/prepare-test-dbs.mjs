@@ -2,7 +2,9 @@ import { Client } from 'pg';
 import { spawnSync } from 'node:child_process';
 
 if (process.env.NODE_ENV !== 'test' || process.env.DB_HOST !== 'postgres') {
-  throw new Error('Refusing to prepare a database outside the temporary PostgreSQL Compose service');
+  throw new Error(
+    'Refusing to prepare a database outside the temporary PostgreSQL Compose service',
+  );
 }
 const count = Number(process.env.TEST_WORKERS ?? 4);
 const prefix = process.env.TEST_DB_PREFIX ?? 'acadflow_test';
@@ -24,10 +26,14 @@ try {
     if (!row.rowCount) {
       await client.query(`CREATE DATABASE "${name}"`);
     }
-    const migrate = spawnSync('pnpm', ['migration:run'], {
-      stdio: 'inherit',
-      env: { ...process.env, NODE_ENV: 'test', DB_DATABASE: name },
-    });
+    const migrate = spawnSync(
+      'pnpm',
+      ['exec', 'typeorm', 'migration:run', '-d', 'dist/database/data-source.js'],
+      {
+        stdio: 'inherit',
+        env: { ...process.env, NODE_ENV: 'test', DB_DATABASE: name },
+      },
+    );
     if (migrate.error || migrate.status !== 0) {
       if (migrate.error) console.error(migrate.error.message);
       throw new Error(`Migrations failed on ${name}`);

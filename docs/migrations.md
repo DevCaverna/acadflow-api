@@ -1,11 +1,11 @@
 # Padrão de migrations TypeORM (pnpm)
 
-| Script | O que faz |
-| --- | --- |
+| Script                       | O que faz                                                  |
+| ---------------------------- | ---------------------------------------------------------- |
 | `pnpm migration:create Nome` | Cria o arquivo com timestamp em `src/database/migrations/` |
-| `pnpm migration:show` | Lista executadas e pendentes |
-| `pnpm migration:run` | Executa as pendentes |
-| `pnpm migration:revert` | Desfaz só a última |
+| `pnpm migration:show`        | Lista executadas e pendentes                               |
+| `pnpm migration:run`         | Executa as pendentes                                       |
+| `pnpm migration:revert`      | Desfaz só a última                                         |
 
 `show`, `run` e `revert` compilam o projeto e usam `dist/database/data-source.js`, o mesmo código que roda em produção.
 
