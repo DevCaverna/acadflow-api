@@ -1,0 +1,6 @@
+{
+  "unexpectedError": "An unexpected error occurred",
+  "unauthorized": "Unauthorized",
+  "forbidden": "Access denied",
+  "invalidCredentials": "Invalid credentials"
+}
