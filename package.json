@@ -18,7 +18,12 @@
     "test:e2e:docker": "node scripts/run-docker-tests.mjs e2e",
     "test:docker": "node scripts/run-docker-tests.mjs all",
     "test:cov": "vitest run --config vitest.config.unit.ts --coverage",
-    "build": "nest build && tsc-alias -p tsconfig.build.json"
+    "build": "nest build && tsc-alias -p tsconfig.build.json",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main.js",
+    "migration:run": "pnpm build && typeorm migration:run -d dist/database/data-source.js",
+    "migration:show": "pnpm build && typeorm migration:show -d dist/database/data-source.js",
+    "migration:revert": "pnpm build && typeorm migration:revert -d dist/database/data-source.js"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",

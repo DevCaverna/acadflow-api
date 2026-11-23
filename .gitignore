@@ -16,3 +16,4 @@ coverage/
 .zed/*
 !.zed/settings.json
 !.zed/tasks.json
+.agents/artifacts/

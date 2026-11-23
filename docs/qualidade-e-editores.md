@@ -27,6 +27,6 @@ O TypeScript não reescreve os aliases no JS compilado. Durante o bootstrap:
 
 As configurações compartilhadas estão em `.vscode/` e `.zed/`, com Oxc para lint/format e sugestões de import não relativo no VS Code. Evitar commitar preferências pessoais de editor.
 
-## Internacionalização do PR
+## Idiomas
 
-O checklist de PR cobra tradução apenas em `pt-BR`. Isso **não altera nem remove** arquivos de locale `en` e `es` criados previamente; essa decisão de produto é independente do checklist.
+O AcadFlow usa somente `pt-BR` (padrão) e `en`. O checklist de PR cobra `pt-BR`; novas traduções devem ser adicionadas também em `en`.

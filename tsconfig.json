@@ -9,7 +9,6 @@
     "types": [
       "node"
     ],
-    "rootDir": "./src",
     "outDir": "./dist",
     "declaration": true,
     "sourceMap": true,
@@ -29,12 +28,12 @@
     }
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "vitest.config*.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "test",
-    "**/*.spec.ts"
+    "dist"
   ]
 }

@@ -10,7 +10,7 @@ src/
   common/{decorators,guards,filters,interceptors}/
   database/{data-source.ts,migrations/,seeds/}
   i18n/{pt-BR,en}/
-  modules/{auth,users,disciplines,enrollments,activities,grades,storage}/
+  modules/{auth,users,disciplines,enrollments,activities,grades,health,storage}/
 test/
 scripts/migration-create.mjs
 ```
