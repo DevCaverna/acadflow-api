@@ -9,4 +9,10 @@ coverage/
 *.log
 .DS_Store
 .idea/
-.vscode/
+# Shared editor settings are committed; local workspace files are ignored.
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.zed/*
+!.zed/settings.json
+!.zed/tasks.json

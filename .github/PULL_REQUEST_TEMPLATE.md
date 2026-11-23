@@ -40,7 +40,7 @@
 - [ ] Organização por módulos de domínio em `src/modules/`; nomes em inglês e imports por alias `@/`
 - [ ] Controllers delegam regras a services; DTOs validam entradas; erros seguem códigos estáveis
 - [ ] Nenhum `console.log` ou código comentado desnecessário
-- [ ] Mensagens são traduzidas por `nestjs-i18n` em `pt-BR`, `en` e `es`, quando aplicável
+- [ ] Mensagens são traduzidas por `nestjs-i18n` em `pt-BR`, quando aplicável
 - [ ] O backend valida propriedade/matrícula e papéis `PROFESSOR` / `ALUNO`
 - [ ] Médias seguem o design: >= 7 aprovado; 5 a < 7 recuperação; < 5 reprovado; sem avaliações = `SEM_NOTAS`
 - [ ] Dados sensíveis e senhas não vazam nas respostas; bcrypt é usado para armazenamento de senha

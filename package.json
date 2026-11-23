@@ -1,0 +1,23 @@
+{
+  "name": "acadflow-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AcadFlow API - initial quality tooling scaffold",
+  "scripts": {
+    "lint": "oxlint --type-aware --deny-warnings src/ test/ scripts/",
+    "lint:fix": "oxlint --type-aware --fix src/ test/ scripts/",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "migration:create": "node scripts/migration-create.mjs",
+    "pr": "pnpm lint && pnpm format:check && pnpm typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "oxlint": "^1.88.0",
+    "oxfmt": "^0.73.0",
+    "oxlint-tsgolint": "^7.0.2004",
+    "typescript": "~6.0.3"
+  },
+  "packageManager": "pnpm@12.4.2"
+}
