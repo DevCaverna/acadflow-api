@@ -1,0 +1,7 @@
+{
+  "appName": "AcadFlow",
+  "unexpectedError": "Ocurrió un error inesperado",
+  "unauthorized": "No autorizado",
+  "forbidden": "Acceso denegado",
+  "invalidCredentials": "Credenciales inválidas"
+}
