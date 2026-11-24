@@ -73,6 +73,11 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_ACCESS_EXPIRES_IN: ${{ vars.JWT_ACCESS_EXPIRES_IN || '15m' }}
           I18N_FALLBACK_LANGUAGE: ${{ vars.I18N_FALLBACK_LANGUAGE || 'pt-BR' }}
+          R2_ENABLED: ${{ vars.R2_ENABLED || 'false' }}
+          R2_ENDPOINT: ${{ vars.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
         run: |
           set -euo pipefail
           [[ $DEPLOY_HOST =~ ^[[:alnum:]][[:alnum:].-]*$ ]]
@@ -82,7 +87,12 @@ jobs:
           [[ $DIGEST =~ ^sha256:[0-9a-f]{64}$ ]]
           case "$TARGET" in development | staging | production) ;; *) exit 1 ;; esac
           keys=(API_HOST_PORT CORS_ORIGIN DB_HOST DB_PORT DB_USERNAME DB_PASSWORD DB_DATABASE DB_SSL
-            JWT_SECRET JWT_ACCESS_EXPIRES_IN I18N_FALLBACK_LANGUAGE)
+            JWT_SECRET JWT_ACCESS_EXPIRES_IN I18N_FALLBACK_LANGUAGE R2_ENABLED)
+          case "$R2_ENABLED" in
+            true) keys+=(R2_ENDPOINT R2_BUCKET_NAME R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY) ;;
+            false) ;;
+            *) printf 'Invalid GitHub Environment setting: R2_ENABLED (expected true or false)\n' >&2; exit 1 ;;
+          esac
           for key in DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS "${keys[@]}"; do
             [[ -n ${!key} ]] || { printf 'Missing GitHub Environment setting: %s\n' "$key" >&2; exit 1; }
           done
