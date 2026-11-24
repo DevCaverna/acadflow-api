@@ -7,8 +7,10 @@ import { AcceptLanguageResolver, I18nModule } from 'nestjs-i18n';
 import { ApiExceptionFilter } from '@/common/filters/api-exception.filter';
 import { ApiException } from '@/common/filters/api.exception';
 import { getDatabaseOptions } from '@/config/database.config';
+import { ActivitiesModule } from '@/modules/activities/activities.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { DisciplinesModule } from '@/modules/disciplines/disciplines.module';
+import { EnrollmentsModule } from '@/modules/enrollments/enrollments.module';
 import { GradesModule } from '@/modules/grades/grades.module';
 import { HealthModule } from '@/modules/health/health.module';
 
@@ -23,8 +25,10 @@ import { HealthModule } from '@/modules/health/health.module';
       loaderOptions: { path: join(__dirname, 'i18n'), watch: false },
       resolvers: [AcceptLanguageResolver],
     }),
+    ActivitiesModule,
     AuthModule,
     DisciplinesModule,
+    EnrollmentsModule,
     GradesModule,
     HealthModule,
   ],

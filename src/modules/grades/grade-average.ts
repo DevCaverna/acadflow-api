@@ -1,4 +1,6 @@
-export type GradeStatus = 'NO_GRADES' | 'APPROVED' | 'RECOVERY' | 'FAILED';
+export const GRADE_STATUSES = ['NO_GRADES', 'APPROVED', 'RECOVERY', 'FAILED'] as const;
+
+export type GradeStatus = (typeof GRADE_STATUSES)[number];
 
 export type GradeAverage = { readonly average: number | null; readonly status: GradeStatus };
 

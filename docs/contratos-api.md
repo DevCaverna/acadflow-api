@@ -91,6 +91,7 @@ Todas são do professor responsável. Não há exclusão em cascata.
 - A Web apresenta a média como **parcial** enquanto houver atividades sem nota.
 - `(code, semester)` é único por disciplina; repetir retorna `409 CONFLICT`. `semester` segue `2026.1` ou `2026.2`. `code` e `semester` não mudam depois da criação.
 - `PATCH /disciplines/:id` aceita `description: null` para remover a descrição e retorna `200 Discipline`. `DELETE /disciplines/:id` retorna `204`.
+- `dueAt` exige data, hora e fuso (`2026-11-25T23:59:00Z`). Atividades vêm por prazo, com as sem prazo no fim. `PATCH /activities/:id` aceita `null` em `description` e `dueAt`; `DELETE` retorna `204`.
 
 ## Erros
 
