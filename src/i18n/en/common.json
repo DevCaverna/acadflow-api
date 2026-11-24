@@ -1,6 +1,13 @@
 {
-  "unexpectedError": "An unexpected error occurred",
-  "unauthorized": "Unauthorized",
-  "forbidden": "Access denied",
-  "invalidCredentials": "Invalid credentials"
+  "fields": {
+    "email": "email",
+    "password": "password",
+    "name": "name",
+    "code": "code",
+    "semester": "semester",
+    "description": "description",
+    "title": "title",
+    "dueAt": "due date",
+    "value": "grade"
+  }
 }
