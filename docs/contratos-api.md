@@ -81,7 +81,8 @@ Todas são do professor responsável. Não há exclusão em cascata.
 
 - **Cadastro público:** `POST /auth/register`, que cria somente `ALUNO`. No MVP, as contas vêm de seed.
 - **Matrículas manuais:** `POST` e `DELETE /disciplines/:id/enrollments`. No MVP, vêm de seed.
-- Perfil completo, avatar (R2/Sharp), anexos e notificações.
+- **Perfil:** `GET` e `PATCH /users/me` (`{ name?, email? }`, `200 User`; e-mail em uso retorna `409`) e `PATCH /users/me/password` (`{ currentPassword, newPassword }`, `204`). Senha de 8 caracteres a 72 bytes. O papel nunca é editável.
+- Avatar (R2/Sharp), anexos e notificações.
 
 ## Regras
 
@@ -95,15 +96,16 @@ Todas são do professor responsável. Não há exclusão em cascata.
 
 ## Erros
 
-| Status | `code`                 | Quando                                         |
-| ------ | ---------------------- | ---------------------------------------------- |
-| `400`  | `VALIDATION_ERROR`     | Dados inválidos, inclusive nota fora da faixa  |
-| `401`  | `INVALID_CREDENTIALS`  | Login inválido, sem revelar se o e-mail existe |
-| `401`  | `UNAUTHORIZED`         | Token ausente, inválido ou expirado            |
-| `403`  | `FORBIDDEN`            | Perfil ou vínculo insuficiente                 |
-| `404`  | `NOT_FOUND`            | Recurso inexistente                            |
-| `409`  | `CONFLICT`             | Duplicidade ou exclusão bloqueada              |
-| `422`  | `STUDENT_NOT_ENROLLED` | Nota para aluno não matriculado                |
-| `500`  | `INTERNAL_ERROR`       | Falha inesperada                               |
+| Status | `code`                     | Quando                                         |
+| ------ | -------------------------- | ---------------------------------------------- |
+| `400`  | `INVALID_CURRENT_PASSWORD` | Senha atual incorreta na troca de senha        |
+| `400`  | `VALIDATION_ERROR`         | Dados inválidos, inclusive nota fora da faixa  |
+| `401`  | `INVALID_CREDENTIALS`      | Login inválido, sem revelar se o e-mail existe |
+| `401`  | `UNAUTHORIZED`             | Token ausente, inválido ou expirado            |
+| `403`  | `FORBIDDEN`                | Perfil ou vínculo insuficiente                 |
+| `404`  | `NOT_FOUND`                | Recurso inexistente                            |
+| `409`  | `CONFLICT`                 | Duplicidade ou exclusão bloqueada              |
+| `422`  | `STUDENT_NOT_ENROLLED`     | Nota para aluno não matriculado                |
+| `500`  | `INTERNAL_ERROR`           | Falha inesperada                               |
 
 `message` é traduzida conforme `Accept-Language`; `code` e enums nunca são traduzidos. Sem o cabeçalho, ou com idioma não suportado, a resposta vem em `pt-BR`. Em `VALIDATION_ERROR`, `message` reúne as mensagens dos campos separadas por `; `. Outros status `4xx`, como `413`, mantêm o status e usam `VALIDATION_ERROR`.

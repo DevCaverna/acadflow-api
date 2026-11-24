@@ -2,6 +2,7 @@ import { HttpStatus } from '@nestjs/common';
 
 export const ERROR_STATUS = {
   VALIDATION_ERROR: HttpStatus.BAD_REQUEST,
+  INVALID_CURRENT_PASSWORD: HttpStatus.BAD_REQUEST,
   INVALID_CREDENTIALS: HttpStatus.UNAUTHORIZED,
   UNAUTHORIZED: HttpStatus.UNAUTHORIZED,
   FORBIDDEN: HttpStatus.FORBIDDEN,
