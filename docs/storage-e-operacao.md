@@ -45,11 +45,10 @@ O AcadFlow utiliza um **bucket privado** no Cloudflare R2 (compatível com S3) p
 | Variável               | Exemplo / Padrão                             | Descrição                                                                                                   |
 | ---------------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `R2_ENABLED`           | `false` / `true`                             | Habilita o `R2StorageService`. Quando `false`, rotas de upload/download retornam `503 STORAGE_UNAVAILABLE`. |
-| `R2_ACCOUNT_ID`        | `a1b2c3d4...`                                | ID da conta Cloudflare (usado para compor o endpoint se `R2_ENDPOINT` não for informado).                   |
 | `R2_BUCKET_NAME`       | `acadflow-files-prod`                        | Nome do bucket privado (use buckets distintos para dev/staging/prod).                                       |
 | `R2_ACCESS_KEY_ID`     | _(secret)_                                   | Access Key ID do token S3 da Cloudflare com permissão de leitura/escrita apenas no bucket alvo.             |
 | `R2_SECRET_ACCESS_KEY` | _(secret)_                                   | Secret Access Key correspondente.                                                                           |
-| `R2_ENDPOINT`          | `https://<account>.r2.cloudflarestorage.com` | Endpoint S3-compatível explícito (opcional se `R2_ACCOUNT_ID` estiver definido; útil em emuladores locais). |
+| `R2_ENDPOINT`          | `https://<account>.r2.cloudflarestorage.com` | Endpoint S3 sem o nome do bucket. Obrigatório quando `R2_ENABLED=true`.                                     |
 | `AVATAR_MAX_BYTES`     | `2097152` (2 MB)                             | Tamanho máximo permitido para upload de avatar.                                                             |
 | `ATTACHMENT_MAX_BYTES` | `10485760` (10 MB)                           | Tamanho máximo permitido para upload de anexo de atividade.                                                 |
 
@@ -58,7 +57,7 @@ O AcadFlow utiliza um **bucket privado** no Cloudflare R2 (compatível com S3) p
 1. Criar um bucket **privado** no Cloudflare R2 (sem acesso público/Custom Domain aberto).
 2. Gerar um API Token restrito ao bucket com permissões `Object Read & Write`.
 3. Se os downloads via URL pré-assinada forem abertos ou buscados pelo navegador, configurar a política de **CORS** do bucket permitindo `GET` a partir da mesma origem configurada em `CORS_ORIGIN`.
-4. Cadastrar `R2_ENABLED`, `R2_ACCOUNT_ID`, `R2_BUCKET_NAME` e `R2_ENDPOINT` como Variables, e `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` como Secrets nos Environments do GitHub.
+4. Cadastrar `R2_ENABLED=true`, `R2_BUCKET_NAME` e `R2_ENDPOINT` como Variables, e `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` como Secrets no GitHub Environment da API. A aplicação não usa `R2_ACCOUNT_ID` separadamente.
 
 ---
 

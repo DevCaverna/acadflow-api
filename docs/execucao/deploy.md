@@ -50,6 +50,13 @@ manualmente; um push ou uma execução da CI não publica nem implanta imagens p
 `PORT` e `NODE_ENV` não precisam ser cadastradas: o comando fixa `PORT=3000` e
 `NODE_ENV=production` dentro dos três contêineres.
 
+Para habilitar avatares e anexos, configure as variables `R2_ENABLED=true`,
+`R2_ENDPOINT` (URL S3, sem o nome do bucket) e `R2_BUCKET_NAME`, além dos secrets
+`R2_ACCESS_KEY_ID` e `R2_SECRET_ACCESS_KEY` no mesmo Environment. Com `R2_ENABLED=true`,
+o deploy falha se algum desses valores estiver vazio. Se a flag for omitida ou `false`,
+o deploy não envia as credenciais ao contêiner. Consulte o
+[guia de provisionamento do R2](../storage-e-operacao.md#2-configuração-do-cloudflare-r2-aca-25).
+
 ### Contrato com a VPS
 
 - Host Linux `amd64` com Bash, Docker Engine, `curl`, `base64` (GNU coreutils) e `flock` (`util-linux`).
