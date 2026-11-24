@@ -8,7 +8,7 @@ Todas as mudanças notáveis da **AcadFlow API** são documentadas neste arquivo
 
 - Documentação completa da API: arquitetura real com diagramas Mermaid, dicionário de dados em [docs/banco-de-dados.md](docs/banco-de-dados.md), ADRs (`docs/adr/`), regras de negócio e matriz RBAC ([docs/regras-de-negocio.md](docs/regras-de-negocio.md)), guia de segurança ([docs/seguranca.md](docs/seguranca.md)), guia de Swagger ([docs/swagger.md](docs/swagger.md)), guia de storage/operação ([docs/storage-e-operacao.md](docs/storage-e-operacao.md)), guia full-stack local ([docs/execucao/fullstack-local.md](docs/execucao/fullstack-local.md)) e coleção HTTP ([docs/http/acadflow-api.http](docs/http/acadflow-api.http)).
 - Metadados OpenAPI enriquecidos no Swagger (`/docs`) com descrição, versão, tags de todos os módulos, `persistAuthorization` e `@ApiOperation` em `GET /health`.
-- Governança: `CHANGELOG.md`, `SECURITY.md` e `LICENSE` (MIT).
+- Governança: `CHANGELOG.md`, `SECURITY.md`, `LICENSE`, `.github/CODEOWNERS`, `.github/dependabot.yml` e Plano de Gerência de Configuração ([docs/gerencia-de-configuracao.md](docs/gerencia-de-configuracao.md)).
 
 ### Em andamento em branches de feature (não mergeadas em `develop`/`main`)
 

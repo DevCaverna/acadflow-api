@@ -65,29 +65,30 @@ pnpm start:dev
 
 ## Documentação
 
-| Página                                                                                     | O que tem                                      |
-| ------------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| [Linear](https://linear.app/acadflow/document/acadflow-inicio-e-documentacao-9f01545a3125) | Início e documentação do projeto               |
-| [Execução](docs/execucao/README.md)                                                        | Como rodar, testar e resolver problemas        |
-| [Execução Full-Stack](docs/execucao/fullstack-local.md)                                    | Subir PostgreSQL, API e Web juntos localmente  |
-| [Deploy e Releases](docs/execucao/deploy.md)                                               | Pipeline de imagem GHCR, promoção e VPS        |
-| [Arquitetura](docs/arquitetura.md)                                                         | Camadas, fluxos Mermaid e decisões             |
-| [Banco de Dados](docs/banco-de-dados.md)                                                   | DER, dicionário de dados e seeds               |
-| [Regras de Negócio](docs/regras-de-negocio.md)                                             | Médias, restrições e matriz RBAC               |
-| [Segurança](docs/seguranca.md)                                                             | JWT, bcrypt, validações e supply chain         |
-| [Swagger / OpenAPI](docs/swagger.md)                                                       | Documentação interativa em `/docs`             |
-| [Storage e Operação](docs/storage-e-operacao.md)                                           | R2, avatares, anexos e CLI (`ACA-24`/`ACA-25`) |
-| [ADRs](docs/adr/README.md)                                                                 | Registros de decisões arquiteturais            |
-| [Configuração](docs/configuracao.md)                                                       | Variáveis de ambiente                          |
-| [Testes](docs/testes.md)                                                                   | Tipos de teste e comandos                      |
-| [CI](docs/CI.md)                                                                           | Pipeline e branches                            |
-| [Qualidade e editores](docs/qualidade-e-editores.md)                                       | Oxlint, Oxfmt, TypeScript, VS Code e Zed       |
-| [Contratos REST](docs/contratos-api.md)                                                    | Rotas, tipos e erros                           |
-| [Coleção HTTP](docs/http/acadflow-api.http)                                                | Requisições prontas para REST Client           |
-| [Migrations](docs/migrations.md)                                                           | Padrão de migrations                           |
-| [AGENTS.md](AGENTS.md)                                                                     | Diretrizes para colaboradores e agentes        |
-| [Changelog](CHANGELOG.md)                                                                  | Histórico de entregas                          |
-| [Segurança (Política)](SECURITY.md)                                                        | Reporte de vulnerabilidades                    |
+| Página                                                                                     | O que tem                                         |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| [Linear](https://linear.app/acadflow/document/acadflow-inicio-e-documentacao-9f01545a3125) | Início e documentação do projeto                  |
+| [Execução](docs/execucao/README.md)                                                        | Como rodar, testar e resolver problemas           |
+| [Execução Full-Stack](docs/execucao/fullstack-local.md)                                    | Subir PostgreSQL, API e Web juntos localmente     |
+| [Deploy e Releases](docs/execucao/deploy.md)                                               | Pipeline de imagem GHCR, promoção e VPS           |
+| [Arquitetura](docs/arquitetura.md)                                                         | Camadas, fluxos Mermaid e decisões                |
+| [Banco de Dados](docs/banco-de-dados.md)                                                   | DER, dicionário de dados e seeds                  |
+| [Regras de Negócio](docs/regras-de-negocio.md)                                             | Médias, restrições e matriz RBAC                  |
+| [Segurança](docs/seguranca.md)                                                             | JWT, bcrypt, validações e supply chain            |
+| [Swagger / OpenAPI](docs/swagger.md)                                                       | Documentação interativa em `/docs`                |
+| [Storage e Operação](docs/storage-e-operacao.md)                                           | R2, avatares, anexos e CLI (`ACA-24`/`ACA-25`)    |
+| [ADRs](docs/adr/README.md)                                                                 | Registros de decisões arquiteturais               |
+| [Configuração](docs/configuracao.md)                                                       | Variáveis de ambiente                             |
+| [Testes](docs/testes.md)                                                                   | Tipos de teste e comandos                         |
+| [CI](docs/CI.md)                                                                           | Pipeline e branches                               |
+| [Gerência de Configuração](docs/gerencia-de-configuracao.md)                               | Plano GCS (IEEE 828), baselines, hotfix e FCA/PCA |
+| [Qualidade e editores](docs/qualidade-e-editores.md)                                       | Oxlint, Oxfmt, TypeScript, VS Code e Zed          |
+| [Contratos REST](docs/contratos-api.md)                                                    | Rotas, tipos e erros                              |
+| [Coleção HTTP](docs/http/acadflow-api.http)                                                | Requisições prontas para REST Client              |
+| [Migrations](docs/migrations.md)                                                           | Padrão de migrations                              |
+| [AGENTS.md](AGENTS.md)                                                                     | Diretrizes para colaboradores e agentes           |
+| [Changelog](CHANGELOG.md)                                                                  | Histórico de entregas                             |
+| [Segurança (Política)](SECURITY.md)                                                        | Reporte de vulnerabilidades                       |
 
 ## Repositórios
 
