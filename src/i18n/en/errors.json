@@ -6,5 +6,7 @@
   "NOT_FOUND": "Resource not found",
   "CONFLICT": "The operation conflicts with existing data",
   "STUDENT_NOT_ENROLLED": "The student is not enrolled in the discipline",
-  "INTERNAL_ERROR": "An unexpected error occurred"
+  "INTERNAL_ERROR": "An unexpected error occurred",
+  "INVALID_CURRENT_PASSWORD": "Current password is incorrect",
+  "TOO_MANY_REQUESTS": "Too many attempts. Wait a few minutes and try again"
 }

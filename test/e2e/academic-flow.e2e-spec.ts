@@ -108,6 +108,58 @@ describe('Activities, enrollments and grades', () => {
     await call(owner, 'get', `/disciplines/${randomUUID()}/students`).expect(404);
   });
 
+  describe('manual enrollments', () => {
+    const path = (studentId = '') => `/disciplines/${disciplineId}/students/${studentId}`;
+
+    it('searches only students that are not enrolled', async () => {
+      const search = (term: string) =>
+        call(owner, 'get', `${path('candidates')}?search=${encodeURIComponent(term)}`);
+      expect((await search('out').expect(200)).body).toEqual([
+        { id: outsider.id, name: 'Out', email: outsider.email },
+      ]);
+      expect((await search('Other').expect(200)).body).toEqual([]);
+      expect((await search(student.email).expect(200)).body).toEqual([]);
+      expect((await search('%%%').expect(200)).body).toEqual([]);
+      await search('ou').expect(400);
+      await call(owner, 'get', path('candidates')).expect(400);
+    });
+
+    it('enrolls once and gives access to the student', async () => {
+      const response = await call(owner, 'post', path(outsider.id)).expect(201);
+      expect(response.body).toEqual({ id: outsider.id, name: 'Out', email: outsider.email });
+      await call(outsider, 'get', `/disciplines/${disciplineId}`).expect(200);
+      const repeated = await call(owner, 'post', path(outsider.id));
+      expect(repeated.body).toMatchObject({ statusCode: 409, code: 'CONFLICT' });
+    });
+
+    it('enrolls only existing students', async () => {
+      await call(owner, 'post', path(otherProfessor.id)).expect(404);
+      await call(owner, 'post', path(randomUUID())).expect(404);
+    });
+
+    it('removes a student without grades and keeps the history otherwise', async () => {
+      const { id } = await createActivity();
+      await grade(id, student, 7);
+      const blocked = await call(owner, 'delete', path(student.id));
+      expect(blocked.body).toMatchObject({ statusCode: 409, code: 'CONFLICT' });
+      await call(owner, 'delete', path(classmate.id)).expect(204);
+      await call(owner, 'delete', path(classmate.id)).expect(404);
+      await call(classmate, 'get', `/disciplines/${disciplineId}`).expect(403);
+      const late = await call(owner, 'put', `/activities/${id}/grades/${classmate.id}`, {
+        value: 5,
+      });
+      expect(late.body).toMatchObject({ code: 'STUDENT_NOT_ENROLLED' });
+    });
+
+    it('prevents students and other professors from managing enrollments', async () => {
+      for (const account of [outsider, otherProfessor]) {
+        await call(account, 'get', `${path('candidates')}?search=test`).expect(403);
+        await call(account, 'post', path(outsider.id)).expect(403);
+        await call(account, 'delete', path(student.id)).expect(403);
+      }
+    });
+  });
+
   it('creates activities and lists them by due date to linked users', async () => {
     const open = await createActivity({ title: '  No date  ' });
     const late = await createActivity({ dueAt: '2026-12-02T12:00:00-03:00' });

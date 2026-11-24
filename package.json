@@ -23,6 +23,8 @@
     "start:prod": "node dist/main.js",
     "migration:run": "pnpm build && typeorm migration:run -d dist/database/data-source.js",
     "migration:show": "pnpm build && typeorm migration:show -d dist/database/data-source.js",
+    "user:create": "pnpm build && node dist/database/cli/run-create-user.js",
+    "user:create:prod": "node dist/database/cli/run-create-user.js",
     "seed": "pnpm build && node dist/database/seeds/run-seed.js",
     "migration:run:prod": "typeorm migration:run -d dist/database/data-source.js",
     "migration:revert": "pnpm build && typeorm migration:revert -d dist/database/data-source.js"

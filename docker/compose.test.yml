@@ -4,6 +4,7 @@ services:
   postgres:
     image: postgres:17-alpine
     environment:
+      TZ: UTC
       POSTGRES_USER: ${POSTGRES_USER:-acadflow_test}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-test-only-change-me}
       POSTGRES_DB: postgres
@@ -26,6 +27,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: test
+      TZ: UTC
       TEST_WORKERS: ${TEST_WORKERS:-4}
       TEST_DB_PREFIX: ${TEST_DB_PREFIX:-acadflow_test}
       TEST_SUITE: all
