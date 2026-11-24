@@ -61,7 +61,7 @@ scripts/
 
 ### Padrões de implementação
 
-- **Tipagem:** métodos de service com mais de um dado recebem um objeto tipado e declaram o retorno. Linhas cruas usam tipo próprio em `<modulo>.types.ts` (`getRawOne<ActivityAccessRow>()`).
+- **Tipagem:** métodos de service com mais de um dado recebem um objeto tipado e declaram o retorno. Linhas cruas usam tipo próprio em `<modulo>.types.ts` (`getRawOne<XRow>()`).
 - **QueryBuilder:** usar em consultas com joins ou filtros, com parâmetros nomeados e blocos em métodos privados (`applyFilter`, `applyVisibility`). Nunca concatenar entrada do usuário no SQL.
 - **Paginação:** `PaginationOptionsDto<FilterDto>` com `ValidatePaginationPipe(FilterDto, SORT_FIELDS)` e retorno `Listing<ResponseDto>`. Ordenar só por campos permitidos, com desempate por `id`.
 - **DTOs:** `@ApiProperty`/`@ApiPropertyOptional` em todo campo e validação com `i18nValidationMessage('validation.*')`. A resposta usa DTO próprio, nunca a entidade.

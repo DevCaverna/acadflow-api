@@ -136,16 +136,25 @@ printf -v remote_command "bash -c '%s' -- '%s' '%s'" "${script//\'/\'\\\'\'}" pr
 assert_failure 'Missing runtime setting: API_HOST_PORT' sh -c "$remote_command" < /dev/null
 assert_failure 'Invalid runtime setting: API_HOST_PORT' \
   sh -c "$remote_command" < <(printf '%s\0' 'PATH=/tmp')
+runtime=('CORS_ORIGIN=https://app.example.com' 'DB_HOST=db.example.com'
+  'DB_PORT=5432' 'DB_USERNAME=app' 'DB_PASSWORD=not-real' 'DB_DATABASE=acadflow'
+  'DB_SSL=true' 'JWT_SECRET=not-real' 'JWT_ACCESS_EXPIRES_IN=15m' 'I18N_FALLBACK_LANGUAGE=pt-BR')
+r2=('R2_ENDPOINT=https://example.r2.cloudflarestorage.com' 'R2_BUCKET_NAME=private-test'
+  'R2_ACCESS_KEY_ID=not-real' 'R2_SECRET_ACCESS_KEY=not-real')
 assert_failure 'Invalid API_HOST_PORT' \
-  sh -c "$remote_command" < <(printf '%s\0' \
-    'API_HOST_PORT=65536' 'CORS_ORIGIN=https://app.example.com' 'DB_HOST=db.example.com' \
-    'DB_PORT=5432' 'DB_USERNAME=app' 'DB_PASSWORD=not-real' 'DB_DATABASE=acadflow' \
-    'DB_SSL=true' 'JWT_SECRET=not-real' 'JWT_ACCESS_EXPIRES_IN=15m' 'I18N_FALLBACK_LANGUAGE=pt-BR')
+  sh -c "$remote_command" < <(printf '%s\0' 'API_HOST_PORT=65536' "${runtime[@]}" 'R2_ENABLED=false')
+assert_failure 'R2_ENABLED must be true or false' \
+  sh -c "$remote_command" < <(printf '%s\0' 'API_HOST_PORT=3300' "${runtime[@]}" 'R2_ENABLED=yes')
+assert_failure 'Missing runtime setting: R2_ENDPOINT' \
+  sh -c "$remote_command" < <(printf '%s\0' 'API_HOST_PORT=3300' "${runtime[@]}" 'R2_ENABLED=true')
+assert_failure 'Empty runtime setting: R2_SECRET_ACCESS_KEY' \
+  sh -c "$remote_command" < <(printf '%s\0' 'API_HOST_PORT=3300' "${runtime[@]}" \
+    'R2_ENABLED=true' "${r2[@]:0:3}" 'R2_SECRET_ACCESS_KEY=')
 assert_failure 'Missing or invalid GHCR token' \
-  sh -c "$remote_command" < <(printf '%s\0' \
-    'API_HOST_PORT=3300' 'CORS_ORIGIN=https://app.example.com' 'DB_HOST=db.example.com' \
-    'DB_PORT=5432' 'DB_USERNAME=app' 'DB_PASSWORD=not-real' 'DB_DATABASE=acadflow' \
-    'DB_SSL=true' 'JWT_SECRET=not-real' 'JWT_ACCESS_EXPIRES_IN=15m' 'I18N_FALLBACK_LANGUAGE=pt-BR' \
-    'github-actions[bot]')
+  sh -c "$remote_command" < <(printf '%s\0' 'API_HOST_PORT=3300' "${runtime[@]}" \
+    'R2_ENABLED=false' 'github-actions[bot]')
+assert_failure 'Missing or invalid GHCR token' \
+  sh -c "$remote_command" < <(printf '%s\0' 'API_HOST_PORT=3300' "${runtime[@]}" \
+    'R2_ENABLED=true' "${r2[@]}" 'github-actions[bot]')
 
 printf 'Delivery policy tests passed.\n'

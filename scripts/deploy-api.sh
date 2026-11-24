@@ -16,22 +16,30 @@ esac
 [[ $digest =~ ^sha256:[0-9a-f]{64}$ ]] || fail 'Expected sha256:DIGEST.'
 image="ghcr.io/devcaverna/acadflow-api@$digest"
 
-keys=(API_HOST_PORT CORS_ORIGIN DB_HOST DB_PORT DB_USERNAME DB_PASSWORD DB_DATABASE DB_SSL
-  JWT_SECRET JWT_ACCESS_EXPIRES_IN I18N_FALLBACK_LANGUAGE)
 options=(--env NODE_ENV=production --env PORT=3000
   --user 1000:1000 --cap-drop ALL --security-opt no-new-privileges)
-for key in "${keys[@]}"; do
-  IFS= read -r -d '' -t 10 -n 8193 entry || fail "Missing runtime setting: $key."
-  [[ $entry == "$key="* && ${#entry} -lt 8193 ]] || fail "Invalid runtime setting: $key."
-  value=${entry#*=}
-  [[ -n $value ]] || fail "Empty runtime setting: $key."
-  if [[ $key == API_HOST_PORT ]]; then
-    host_port=$value
-  else
-    export "$key=$value"
-    options+=(--env "$key")
-  fi
-done
+read_runtime_settings() {
+  local key entry value
+  for key in "$@"; do
+    IFS= read -r -d '' -t 10 -n 8193 entry || fail "Missing runtime setting: $key."
+    [[ $entry == "$key="* && ${#entry} -lt 8193 ]] || fail "Invalid runtime setting: $key."
+    value=${entry#*=}
+    [[ -n $value ]] || fail "Empty runtime setting: $key."
+    if [[ $key == API_HOST_PORT ]]; then
+      host_port=$value
+    else
+      export "$key=$value"
+      options+=(--env "$key")
+    fi
+  done
+}
+read_runtime_settings API_HOST_PORT CORS_ORIGIN DB_HOST DB_PORT DB_USERNAME DB_PASSWORD DB_DATABASE DB_SSL \
+  JWT_SECRET JWT_ACCESS_EXPIRES_IN I18N_FALLBACK_LANGUAGE R2_ENABLED
+case "$R2_ENABLED" in
+  true) read_runtime_settings R2_ENDPOINT R2_BUCKET_NAME R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY ;;
+  false) ;;
+  *) fail 'R2_ENABLED must be true or false.' ;;
+esac
 if ! [[ $host_port =~ ^[0-9]{1,5}$ ]] || ! ((10#$host_port >= 1 && 10#$host_port <= 65535)); then
   fail 'Invalid API_HOST_PORT.'
 fi
@@ -43,7 +51,6 @@ fi
 if ! [[ $DB_PORT =~ ^[0-9]{1,5}$ ]] || ! ((10#$DB_PORT >= 1 && 10#$DB_PORT <= 65535)); then
   fail 'Invalid DB_PORT.'
 fi
-unset entry value
 IFS= read -r -d '' -t 10 -n 256 ghcr_username && [[ $ghcr_username =~ ^[a-zA-Z0-9_-]+(\[bot\])?$ ]] ||
   fail 'Missing or invalid GHCR username.'
 IFS= read -r -d '' -t 10 -n 8193 ghcr_token && [[ -n $ghcr_token && ${#ghcr_token} -lt 8193 ]] ||

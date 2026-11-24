@@ -1,0 +1,179 @@
+### Variáveis para VS Code REST Client / IntelliJ HTTP Client
+@baseUrl = http://localhost:3000
+@lang = pt-BR
+@professorEmail = professor@acadflow.local
+@studentEmail = aluno@acadflow.local
+@demoPassword = change-me-1234
+
+### 1. Health check (público)
+GET {{baseUrl}}/health
+
+### 2. Login como Professor
+# @name loginProfessor
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+Accept-Language: {{lang}}
+
+{
+  "email": "{{professorEmail}}",
+  "password": "{{demoPassword}}"
+}
+
+###
+@professorToken = {{loginProfessor.response.body.accessToken}}
+
+### 3. Login como Aluno
+# @name loginStudent
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+Accept-Language: {{lang}}
+
+{
+  "email": "{{studentEmail}}",
+  "password": "{{demoPassword}}"
+}
+
+###
+@studentToken = {{loginStudent.response.body.accessToken}}
+
+### 4. Usuário autenticado
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{professorToken}}
+Accept-Language: {{lang}}
+
+### 5. Listar disciplinas (paginação, filtro e ordenação)
+GET {{baseUrl}}/disciplines?page=1&perPage=20&sortField=name&sortDirection=asc&filter={"semester":"2026.2","search":"BD"}
+Authorization: Bearer {{professorToken}}
+Accept-Language: {{lang}}
+
+### 6. Criar disciplina (PROFESSOR)
+# @name createDiscipline
+POST {{baseUrl}}/disciplines
+Authorization: Bearer {{professorToken}}
+Content-Type: application/json
+Accept-Language: {{lang}}
+
+{
+  "code": "ES-221",
+  "name": "Engenharia de Software",
+  "semester": "2026.2",
+  "description": "Requisitos, arquitetura e testes"
+}
+
+###
+@disciplineId = {{createDiscipline.response.body.id}}
+
+### 7. Consultar disciplina por ID
+GET {{baseUrl}}/disciplines/{{disciplineId}}
+Authorization: Bearer {{professorToken}}
+Accept-Language: {{lang}}
+
+### 8. Editar disciplina (code e semester são imutáveis)
+PATCH {{baseUrl}}/disciplines/{{disciplineId}}
+Authorization: Bearer {{professorToken}}
+Content-Type: application/json
+Accept-Language: {{lang}}
+
+{
+  "name": "Engenharia de Software I",
+  "description": null
+}
+
+### 9. Listar alunos matriculados na disciplina (PROFESSOR)
+GET {{baseUrl}}/disciplines/{{disciplineId}}/students
+Authorization: Bearer {{professorToken}}
+Accept-Language: {{lang}}
+
+### 10. Listar atividades da disciplina
+GET {{baseUrl}}/disciplines/{{disciplineId}}/activities
+Authorization: Bearer {{professorToken}}
+Accept-Language: {{lang}}
+
+### 11. Criar atividade (visível imediatamente aos alunos matriculados)
+# @name createActivity
+POST {{baseUrl}}/disciplines/{{disciplineId}}/activities
+Authorization: Bearer {{professorToken}}
+Content-Type: application/json
+Accept-Language: {{lang}}
+
+{
+  "title": "Trabalho 1 - Arquitetura",
+  "description": "Diagrama C4 e ADRs",
+  "dueAt": "2026-11-30T23:59:00Z"
+}
+
+###
+@activityId = {{createActivity.response.body.id}}
+
+### 12. Editar atividade
+PATCH {{baseUrl}}/activities/{{activityId}}
+Authorization: Bearer {{professorToken}}
+Content-Type: application/json
+Accept-Language: {{lang}}
+
+{
+  "title": "Trabalho 1 - Arquitetura e ADRs",
+  "dueAt": null
+}
+
+### 13. Lançar ou atualizar nota (idempotente — substitua @studentId por um ID válido)
+@studentId = 00000000-0000-7000-8000-000000000000
+PUT {{baseUrl}}/activities/{{activityId}}/grades/{{studentId}}
+Authorization: Bearer {{professorToken}}
+Content-Type: application/json
+Accept-Language: {{lang}}
+
+{
+  "value": 8.5
+}
+
+### 14. Consultar notas e médias da turma (PROFESSOR)
+GET {{baseUrl}}/disciplines/{{disciplineId}}/grades
+Authorization: Bearer {{professorToken}}
+Accept-Language: {{lang}}
+
+### 15. Consultar próprias notas e média (ALUNO matriculado)
+GET {{baseUrl}}/disciplines/{{disciplineId}}/grades/me
+Authorization: Bearer {{studentToken}}
+Accept-Language: {{lang}}
+
+### 16. Excluir atividade (retorna 409 se houver notas ou anexos)
+DELETE {{baseUrl}}/activities/{{activityId}}
+Authorization: Bearer {{professorToken}}
+Accept-Language: {{lang}}
+
+### 17. Excluir disciplina (retorna 409 se houver matrículas ou atividades)
+DELETE {{baseUrl}}/disciplines/{{disciplineId}}
+Authorization: Bearer {{professorToken}}
+Accept-Language: {{lang}}
+
+### 18. Exemplo de erro traduzido em inglês (Accept-Language: en)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+Accept-Language: en
+
+{
+  "email": "{{professorEmail}}",
+  "password": "wrong-password"
+}
+
+# ==============================================================================
+# Rotas Pós-MVP (disponíveis nas branches ACA-24 e ACA-25)
+# ==============================================================================
+
+### [ACA-24] Consultar / atualizar meu perfil
+# GET {{baseUrl}}/users/me
+# Authorization: Bearer {{professorToken}}
+
+### [ACA-24] Buscar alunos elegíveis para matrícula (mínimo 3 caracteres)
+# GET {{baseUrl}}/disciplines/{{disciplineId}}/students/candidates?search=ana
+# Authorization: Bearer {{professorToken}}
+
+### [ACA-24] Matricular aluno manualmente
+# POST {{baseUrl}}/disciplines/{{disciplineId}}/students/{{studentId}}
+# Authorization: Bearer {{professorToken}}
+
+### [ACA-25] Listar anexos de uma atividade
+# GET {{baseUrl}}/activities/{{activityId}}/attachments
+# Authorization: Bearer {{studentToken}}
+

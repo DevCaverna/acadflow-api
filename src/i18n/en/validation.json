@@ -12,5 +12,6 @@
   "isInt": "The {property} field must be an integer",
   "isIn": "The {property} field has a value that is not allowed",
   "isObject": "The {property} field must be a JSON object",
-  "semester": "The {property} field must follow the format 2026.1 or 2026.2"
+  "semester": "The {property} field must follow the format 2026.1 or 2026.2",
+  "maxBytes": "The {property} field must have at most {constraints.0} bytes"
 }

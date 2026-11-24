@@ -16,13 +16,14 @@ describe('InitialSchema', () => {
     await dataSource?.destroy();
   });
 
-  it('creates the five MVP tables', async () => {
+  it('creates the expected tables', async () => {
     const rows: Array<{ name: string }> = await dataSource.query(
       `SELECT table_name AS name FROM information_schema.tables
        WHERE table_schema = 'public' AND table_name <> 'migrations' ORDER BY 1`,
     );
     expect(rows.map(({ name }) => name)).toEqual([
       'activities',
+      'activity_attachments',
       'disciplines',
       'enrollments',
       'grades',

@@ -1,0 +1,26 @@
+# Code Owners — AcadFlow API
+# Define revisores automáticos por área crítica (Controle de Mudanças / GCS)
+
+*                               @aqu1no1 @Vinicius-Antonio
+
+# Pipelines CI/CD, releases e scripts de deploy
+/.github/                       @aqu1no1
+/docker/                        @aqu1no1
+/scripts/                       @aqu1no1
+
+# Banco de dados, migrations e configurações centrais
+/src/database/migrations/       @aqu1no1 @Vinicius-Antonio
+/src/config/                    @aqu1no1
+
+# Módulos de domínio e testes
+/src/modules/auth/              @aqu1no1
+/src/modules/disciplines/       @Vinicius-Antonio @aqu1no1
+/src/modules/enrollments/       @Vinicius-Antonio @aqu1no1
+/src/modules/activities/        @Vinicius-Antonio @aqu1no1
+/src/modules/grades/            @Vinicius-Antonio @aqu1no1
+/test/                          @Vinicius-Antonio @aqu1no1
+
+# Contratos REST e documentação
+/docs/contratos-api.md          @aqu1no1 @Vinicius-Antonio @OtavioGonzaga
+/docs/                          @Vinicius-Antonio @aqu1no1
+
