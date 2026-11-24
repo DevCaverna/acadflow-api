@@ -30,6 +30,8 @@ docker run --rm --env-file <arquivo-do-ambiente> <imagem> npm run migration:run:
 
 Não há `migration:revert:prod`. Para corrigir produção, preferir uma nova migration; revert exige análise de dados e aprovação.
 
+No deploy pelo GitHub Actions, o [comando remoto](execucao/deploy.md) confere o host e o nome do banco, usa a imagem aprovada e impede deploys concorrentes no mesmo ambiente. O rollback da aplicação não desfaz migrations.
+
 ## Testes
 
 `test/integration/migration-cli.int-spec.ts` usa um banco próprio no PostgreSQL temporário para verificar o ciclo show → run → revert → run com o `dist/` e confirma que duas instâncias da API não aplicam migrations ao iniciar.
