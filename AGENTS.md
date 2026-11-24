@@ -59,6 +59,30 @@ scripts/
 - Padrões: `users.service.ts`, `create-user.dto.ts`, `user.entity.ts`, `users.controller.ts`, `users.service.spec.ts`.
 - Comentários somente quando explicam decisões não evidentes; sem `console.log` de depuração ou código comentado. Usar logger do Nest quando necessário.
 
+### Padrões de implementação
+
+- **Tipagem:** métodos de service com mais de um dado recebem um objeto tipado e declaram o retorno. Linhas cruas usam tipo próprio em `<modulo>.types.ts` (`getRawOne<ActivityAccessRow>()`).
+- **QueryBuilder:** usar em consultas com joins ou filtros, com parâmetros nomeados e blocos em métodos privados (`applyFilter`, `applyVisibility`). Nunca concatenar entrada do usuário no SQL.
+- **Paginação:** `PaginationOptionsDto<FilterDto>` com `ValidatePaginationPipe(FilterDto, SORT_FIELDS)` e retorno `Listing<ResponseDto>`. Ordenar só por campos permitidos, com desempate por `id`.
+- **DTOs:** `@ApiProperty`/`@ApiPropertyOptional` em todo campo e validação com `i18nValidationMessage('validation.*')`. A resposta usa DTO próprio, nunca a entidade.
+- **Swagger:** toda rota tem `@ApiOperation({ summary })` e respostas tipadas (`@ApiResponse`, `@ApiListingResponse`, `@ApiErrors`).
+- **Acesso:** `@Auth()` exige login; `@Auth('PROFESSOR')` exige o papel. Usuário autenticado por `@CurrentUser()`.
+
+```ts
+@Get()
+@Auth()
+@ApiOperation({ summary: 'Listar disciplinas' })
+@ApiListingResponse(DisciplineResponseDto)
+@ApiErrors(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
+findAll(
+  @CurrentUser() user: User,
+  @Query(new ValidatePaginationPipe(DisciplineFilterDto, DISCIPLINE_SORT_FIELDS))
+  paginationOptionsDto: PaginationOptionsDto<DisciplineFilterDto>,
+): Promise<Listing<DisciplineResponseDto>> {
+  return this.disciplinesService.findAll({ user, paginationOptionsDto });
+}
+```
+
 ## 4. Regras de negócio e segurança
 
 - Os únicos papéis são `PROFESSOR` e `ALUNO`. No MVP, contas e matrículas são criadas por seed. O cadastro público é pós-MVP e só poderá criar `ALUNO`; professor, só por seed ou processo autorizado.
@@ -80,6 +104,7 @@ scripts/
 
 ## 6. PostgreSQL, TypeORM e migrations
 
+- IDs são UUID v7, gerados no banco por `public.uuid_generate_v7()` (o PostgreSQL 17 não tem `uuidv7()` nativo). Nova tabela com `id` usa esse default; entidade usa `@PrimaryGeneratedColumn('uuid')`.
 - PostgreSQL 17 e TypeORM com `synchronize: false` e `migrationsRun: false`.
 - Criar migrations **manuais** pelo script `pnpm migration:create NomeDaMigracao`, com timestamp gerado pelo TypeORM. Implementar e revisar `up()` e `down()`.
 - Usar scripts `pnpm migration:show`, `pnpm migration:run` e `pnpm migration:revert`; verificar `DB_HOST` e `DB_DATABASE` antes de `run` ou `revert`.
@@ -123,7 +148,18 @@ pnpm pr
 - Trabalhar exclusivamente dentro do escopo da issue `ACA-*`; descrever o planejamento antes de alterar arquitetura ou contrato.
 - Criar branch `feature/ACA-<numero>-descricao-curta` partindo de `develop`.
 - Promoção: `develop` → `staging` → `main`, sempre via PR e revisão humana.
-- Conventional Commits: `feat:`, `fix:`, `test:`, `docs:`, `refactor:`, `chore:`, `ci:`. Mensagens curtas em inglês.
+- Conventional Commits em inglês, com mensagem curta no formato `<prefixo>: <descrição>`:
+
+  | Prefixo     | Quando usar                |
+  | ----------- | -------------------------- |
+  | `feat:`     | Nova funcionalidade        |
+  | `fix:`      | Correção de bug            |
+  | `refactor:` | Refatoração                |
+  | `test:`     | Adição ou ajuste de testes |
+  | `docs:`     | Documentação               |
+  | `chore:`    | Manutenção e configurações |
+  | `ci:`       | Pipelines e GitHub Actions |
+
 - Preencher `.github/PULL_REQUEST_TEMPLATE.md`, linkar Linear, listar mudanças de contrato/migration, testes e evidências.
 - Antes de adicionar endpoint/campo, consultar `docs/contratos-api.md` e avisar o time Web para atualizar mocks; assim os três desenvolvedores continuam em paralelo.
 - Não editar arquivos de outros repositórios nem tentar merge sem autorização explícita.
