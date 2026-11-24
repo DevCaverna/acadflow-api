@@ -72,7 +72,7 @@ erDiagram
     }
 ```
 
-> **Escopo por branch:** As 5 tabelas principais (`users`, `disciplines`, `enrollments`, `activities`, `grades`) são criadas pelas migrations ativas em `develop`/`main`. A tabela `activity_attachments` é pós-MVP e está implementada na branch `feature/ACA-25-storage-api`.
+> As migrations em `main` criam as cinco tabelas do MVP (`users`, `disciplines`, `enrollments`, `activities`, `grades`) e a tabela pós-MVP `activity_attachments`.
 
 ---
 

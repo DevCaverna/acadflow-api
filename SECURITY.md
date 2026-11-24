@@ -1,14 +1,8 @@
 # Política de Segurança — AcadFlow API
 
-## Versões e Branches Suportadas
+## Versões Suportadas
 
-As correções de segurança são aplicadas na linha ativa de desenvolvimento e promovidas até produção:
-
-| Branch / Ambiente      | Suporte |
-| ---------------------- | ------- |
-| `main` (releases `v*`) | Sim     |
-| `staging`              | Sim     |
-| `develop`              | Sim     |
+As correções de segurança são integradas em `main` e promovidas por ambiente. Em produção, use a release estável mais recente.
 
 ## Como Reportar uma Vulnerabilidade
 

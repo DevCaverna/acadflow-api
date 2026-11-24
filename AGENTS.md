@@ -140,14 +140,14 @@ pnpm build
 pnpm pr
 ```
 
-- GitHub Actions deve validar `develop`, `staging` e `main` com Node 24 e pnpm 12.4.2: lint, format:check, typecheck, testes, build e artefatos **somente após validação verde**.
+- GitHub Actions deve validar PRs para `main` e pushes em `main` com Node 24 e pnpm 12.4.2: lint, format:check, typecheck, testes, build e artefatos **somente após validação verde**.
 - Pipeline não é sinônimo de deploy. Não declarar CI aprovada sem workflow executado com sucesso.
 
 ## 9. Issues, branches, commits e PRs
 
 - Trabalhar exclusivamente dentro do escopo da issue `ACA-*`; descrever o planejamento antes de alterar arquitetura ou contrato.
-- Criar branch `feature/ACA-<numero>-descricao-curta` partindo de `develop`.
-- Promoção: `develop` → `staging` → `main`, sempre via PR e revisão humana.
+- `main` é a única branch permanente. Criar branch `feature/ACA-<numero>-descricao-curta` a partir de `main` e abrir PR para `main`, com revisão e CI.
+- Promover o mesmo digest entre os GitHub Environments `development`, `staging` e `production`; produção usa uma release `vX.Y.Z` homologada em `staging`.
 - Conventional Commits em inglês, com mensagem curta no formato `<prefixo>: <descrição>`:
 
   | Prefixo     | Quando usar                |

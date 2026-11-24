@@ -10,10 +10,12 @@ Todas as mudanças notáveis da **AcadFlow API** são documentadas neste arquivo
 - Metadados OpenAPI enriquecidos no Swagger (`/docs`) com descrição, versão, tags de todos os módulos, `persistAuthorization` e `@ApiOperation` em `GET /health`.
 - Governança: `CHANGELOG.md`, `SECURITY.md`, `LICENSE`, `.github/CODEOWNERS`, `.github/dependabot.yml` e Plano de Gerência de Configuração ([docs/gerencia-de-configuracao.md](docs/gerencia-de-configuracao.md)).
 
-### Em andamento em branches de feature (não mergeadas em `develop`/`main`)
+- **ACA-24 e ACA-27:** edição de perfil, alteração de senha, CLI `pnpm user:create`, padronização em `TZ=UTC`, rate limiting de login e matrículas manuais.
+- **ACA-25 e ACA-26:** Cloudflare R2 privado, processamento de avatares via Sharp, anexos de atividades com URLs pré-assinadas e exposição de `updatedAt` nas notas.
 
-- **`feature/ACA-24-profile-api`:** edição de perfil (`GET`/`PATCH /users/me`), alteração de senha (`PATCH /users/me/password`), CLI `pnpm user:create`, padronização em `TZ=UTC`, rate limiting de login (`429 TOO_MANY_REQUESTS`) e matrículas manuais (`GET .../candidates`, `POST`/`DELETE .../students/:studentId`).
-- **`feature/ACA-25-storage-api`:** integração com Cloudflare R2 privado, processamento de avatares via Sharp (WebP 256×256), anexos de atividades (`activity_attachments` + URLs pré-assinadas) e exposição de `updatedAt` nas notas.
+### Alterado
+
+- CI e snapshots passam a usar `main`; homologação e produção promovem o mesmo digest via GitHub Environments e releases.
 
 ## [0.1.0] - 2026-11-24
 

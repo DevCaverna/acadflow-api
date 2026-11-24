@@ -10,7 +10,7 @@ externos ao projeto.
 Os workflows de entrega precisam existir na branch padrão (`main`). A entrega é acionada
 manualmente; um push ou uma execução da CI não publica nem implanta imagens por si só.
 
-1. Proteja `develop`, `staging` e `main` com revisão e CI obrigatórios. Configure regras para
+1. Proteja `main` com revisão e CI obrigatórios. Configure regras para
    impedir alteração/exclusão de tags `v*`, preservando a criação pelo workflow. Restrinja alterações
    nos workflows de entrega a PRs revisados.
 2. Em **Settings → Environments** no GitHub, crie `development`, `staging` e `production`.
@@ -84,29 +84,29 @@ o deploy não envia as credenciais ao contêiner. Consulte o
 
 ## Publicar e promover
 
-1. Abra **Deploy Snapshot** e execute o workflow a partir de `main`. Selecione
-   `environment=development` e `branch=develop`. O campo `commit` pode ficar vazio para
-   usar o HEAD da branch escolhida quando o job resolver a origem. Se preenchido, use o SHA
-   Git completo de um commit dessa branch. O commit precisa de CI verde de push na branch.
-   O workflow reutiliza a imagem já implantada com sucesso em `development` para o mesmo conteúdo.
+1. Abra **Deploy Snapshot** em `main` e selecione `environment=development`. Deixe
+   `commit` vazio para usar o commit da execução ou informe o SHA completo de outro commit
+   de `main`. O SHA precisa ter CI verde em um push para `main`.
+   O workflow reutiliza uma imagem implantada com sucesso em `development` para esse mesmo SHA.
    Sem uma imagem reutilizável, faz o build pelo `docker/Dockerfile`, publica no GHCR, bloqueia
    vulnerabilidades críticas com Trivy e assina a imagem e o SBOM SPDX com Cosign/OIDC.
-2. Depois do PR `develop → staging` e da CI verde, execute **Deploy Snapshot** novamente
-   com `environment=staging` e `branch=staging`. O workflow procura um deploy bem-sucedido em
-   `development` com a mesma árvore Git e reutiliza seu digest. Um SHA de merge diferente é
-   permitido; sem conteúdo correspondente, não há deploy nem rebuild.
-3. Depois do PR `staging → main` e da CI verde, execute **Create Release** a partir de `main`.
-   Informe `vX.Y.Z`; o workflow usa o HEAD da `main` no momento do acionamento e seleciona
-   o deploy bem-sucedido mais recente em `staging` com a mesma árvore Git. Para escolher outra
-   imagem homologada, informe `candidate` no formato `COMMIT@sha256:DIGEST`. O workflow
-   publica a tag e a GitHub Release com o digest verificado. Se falhar após criar tag ou draft,
-   reexecute os jobs que falharam para manter a mesma versão, candidata e commit.
-   Não retague nem sobrescreva uma versão publicada.
+2. Para homologar, execute **Deploy Snapshot** com `environment=staging` e informe o mesmo
+   SHA que passou em `development`. O workflow reutiliza o digest desse deploy; sem um
+   deployment bem-sucedido para o SHA, não há deploy nem rebuild.
+3. Execute **Create Release** em `main` com `vX.Y.Z`. Por padrão, seleciona o deploy
+   bem-sucedido mais recente em `staging`; use `candidate=COMMIT@sha256:DIGEST` para escolher
+   outro. A tag aponta para o commit homologado em `main`, que não precisa ser seu HEAD atual.
+   Para retomar uma falha parcial, reexecute o job com a mesma versão. Não retague nem
+   sobrescreva uma versão publicada.
 4. Para produção, execute **Deploy Release** em `main` e informe a versão
    `vX.Y.Z`. Confira o digest no resumo do job de verificação. Antes de aprovar, confirme
    o banco de destino, um backup recente com caminho de restauração conhecido e a compatibilidade
    do esquema com a versão que ficará no ar durante a migration. O histórico de deployments
    guarda ambiente, versão, digest e resultado (task `acadflow-image`).
+
+Na primeira execução após a migração, comece em `development` com um commit de `main` que
+tenha CI verde, depois promova esse SHA para `staging`. Snapshots antigos sem CI de push em
+`main` para o SHA registrado não são candidatos a novas releases.
 
 ## Falhas e rollback
 
