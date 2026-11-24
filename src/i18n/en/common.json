@@ -1,0 +1,19 @@
+{
+  "fields": {
+    "email": "email",
+    "password": "password",
+    "name": "name",
+    "code": "code",
+    "semester": "semester",
+    "description": "description",
+    "title": "title",
+    "dueAt": "due date",
+    "value": "grade",
+    "page": "page",
+    "perPage": "items per page",
+    "filter": "filter",
+    "sortField": "sort field",
+    "sortDirection": "sort direction",
+    "search": "search"
+  }
+}
