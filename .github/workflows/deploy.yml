@@ -84,6 +84,17 @@ jobs:
           DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          API_HOST_PORT: ${{ vars.API_HOST_PORT }}
+          CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
+          DB_HOST: ${{ vars.DB_HOST }}
+          DB_PORT: ${{ vars.DB_PORT || '5432' }}
+          DB_USERNAME: ${{ vars.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_DATABASE: ${{ vars.DB_DATABASE }}
+          DB_SSL: ${{ vars.DB_SSL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_ACCESS_EXPIRES_IN: ${{ vars.JWT_ACCESS_EXPIRES_IN || '15m' }}
+          I18N_FALLBACK_LANGUAGE: ${{ vars.I18N_FALLBACK_LANGUAGE || 'pt-BR' }}
         run: |
           set -euo pipefail
           [[ $DEPLOY_HOST =~ ^[[:alnum:]][[:alnum:].-]*$ ]]
@@ -95,11 +106,18 @@ jobs:
           trap 'rm -f "$ssh_dir/key" "$ssh_dir/known_hosts"; rmdir "$ssh_dir"' EXIT
           printf '%s\n' "$DEPLOY_SSH_KEY" > "$ssh_dir/key"
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
-          ssh -nT -F /dev/null -i "$ssh_dir/key" -p "$DEPLOY_PORT" \
-            -o BatchMode=yes -o IdentitiesOnly=yes -o ConnectTimeout=15 \
-            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" \
-            -o GlobalKnownHostsFile=/dev/null -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
-            "root@$DEPLOY_HOST" "deploy $DIGEST"
+          keys=(API_HOST_PORT CORS_ORIGIN DB_HOST DB_PORT DB_USERNAME DB_PASSWORD DB_DATABASE DB_SSL
+            JWT_SECRET JWT_ACCESS_EXPIRES_IN I18N_FALLBACK_LANGUAGE)
+          for key in "${keys[@]}"; do
+            [[ -n ${!key} ]] || { printf 'Missing GitHub Environment setting: %s\n' "$key" >&2; exit 1; }
+          done
+          {
+            for key in "${keys[@]}"; do printf '%s=%s\0' "$key" "${!key}"; done
+          } | ssh -T -F /dev/null -i "$ssh_dir/key" -p "$DEPLOY_PORT" \
+              -o BatchMode=yes -o IdentitiesOnly=yes -o ConnectTimeout=15 \
+              -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$ssh_dir/known_hosts" \
+              -o GlobalKnownHostsFile=/dev/null -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
+              "root@$DEPLOY_HOST" "deploy $DIGEST"
       - name: Record the deployment result
         if: ${{ always() && steps.record.outputs.id != '' }}
         shell: bash

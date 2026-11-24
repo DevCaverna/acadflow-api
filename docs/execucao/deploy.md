@@ -19,14 +19,34 @@ de PR ou manuais não publicam imagens.
    `production`, configure revisores obrigatórios, impeça autoaprovação e desabilite bypass
    administrativo. O workflow recusa produção sem revisores ou se o solicitante puder
    autoaprovar. Não disponibilize chaves SSH no nível do repositório.
-3. Em cada Environment, configure `DEPLOY_HOST` (DNS ou IPv4), `DEPLOY_PORT` (porta SSH,
-   padrão `22`), `DEPLOY_SSH_KEY` (chave privada exclusiva, sem passphrase para execução
-   não interativa) e `DEPLOY_KNOWN_HOSTS` (entrada conferida por um canal confiável; use
-   `[host]:porta` para portas SSH não padrão). Os dois últimos são **secrets**.
+3. Em cada Environment, configure as variables e secrets da tabela abaixo. Na mesma VPS,
+   `DEPLOY_HOST`, `DEPLOY_PORT` e `DEPLOY_KNOWN_HOSTS` podem ser iguais; use uma chave SSH,
+   uma porta HTTP local e um banco distintos por ambiente.
 4. O GHCR precisa permitir publicação por este repositório. Caso o pacote seja privado,
    configure o login Docker de `root` na VPS com credencial **somente de leitura** do pacote.
    Não remova do GHCR a imagem, a assinatura nem a atestação de versões que ainda podem ser
    implantadas.
+
+| Tipo     | Nome                     | Valor                                                                             |
+| -------- | ------------------------ | --------------------------------------------------------------------------------- |
+| Variable | `DEPLOY_HOST`            | DNS ou IPv4 da VPS.                                                               |
+| Variable | `DEPLOY_PORT`            | Porta SSH; padrão `22`.                                                           |
+| Variable | `API_HOST_PORT`          | Porta HTTP local; por exemplo, `3100`, `3200`, `3300`.                            |
+| Variable | `CORS_ORIGIN`            | Origem pública do frontend do ambiente.                                           |
+| Variable | `DB_HOST`                | Host do PostgreSQL externo.                                                       |
+| Variable | `DB_PORT`                | Porta do PostgreSQL; padrão `5432`.                                               |
+| Variable | `DB_DATABASE`            | Banco exclusivo do ambiente.                                                      |
+| Variable | `DB_USERNAME`            | Usuário do banco do ambiente.                                                     |
+| Variable | `DB_SSL`                 | `true` ou `false`, conforme o provedor.                                           |
+| Variable | `JWT_ACCESS_EXPIRES_IN`  | Duração do token; padrão `15m`.                                                   |
+| Variable | `I18N_FALLBACK_LANGUAGE` | Idioma padrão; padrão `pt-BR`.                                                    |
+| Secret   | `DB_PASSWORD`            | Senha do banco do ambiente.                                                       |
+| Secret   | `JWT_SECRET`             | Segredo JWT exclusivo do ambiente.                                                |
+| Secret   | `DEPLOY_SSH_KEY`         | Chave privada SSH exclusiva, sem passphrase.                                      |
+| Secret   | `DEPLOY_KNOWN_HOSTS`     | Chave pública do host verificada; use `[host]:porta` se a porta SSH não for `22`. |
+
+`PORT` e `NODE_ENV` não precisam ser cadastradas: o comando fixa `PORT=3000` e
+`NODE_ENV=production` dentro dos três contêineres.
 
 ### Contrato com a VPS
 
@@ -34,21 +54,20 @@ de PR ou manuais não publicam imagens.
 - Instale `scripts/deploy-api.sh` como `/usr/local/bin/acadflow-deploy`, executável e gravável
   somente por `root`. Atualize o comando no host manualmente quando houver mudanças nele; o
   workflow não envia scripts ao servidor.
-- Em `/etc/acadflow-api/<ambiente>.env`, mantenha as variáveis de runtime de `.env.example`
-  com acesso apenas de `root`. Use sintaxe Docker `KEY=valor`, sem `export` ou aspas ao redor
-  de `DB_HOST` e `DB_DATABASE`. Preencha essas duas chaves exatamente uma vez com o destino
-  esperado. Use um banco separado por ambiente; configure TLS, CORS e JWT conforme o ambiente.
+- O workflow envia as configurações do ambiente pela entrada padrão do SSH. O comando só
+  aceita as chaves de runtime previstas e as repassa ao Docker sem gravar arquivos `.env`
+  na VPS. O Docker guarda as variáveis na configuração dos contêineres; quem tem acesso
+  administrativo ao Docker pode inspecioná-las, inclusive no contêiner de rollback.
 - Em `root` → `authorized_keys`, associe a chave de cada ambiente a um comando fixo:
 
   ```text
-  restrict,command="/usr/local/bin/acadflow-deploy production 3300 db.prod.example acadflow_prod" ssh-ed25519 <chave-publica>
+  restrict,command="/usr/local/bin/acadflow-deploy production" ssh-ed25519 <chave-publica>
   ```
 
-  Os argumentos fixos são ambiente, porta HTTP **local**, host do banco e nome do banco. Use
-  portas diferentes se compartilhar a VPS. A API escuta no contêiner na porta `3000`, vinculada
-  a `127.0.0.1:<porta-http-local>` na VPS para o seu proxy. Restrinja o login SSH de `root`
+  O único argumento fixo é o ambiente. A API escuta no contêiner na porta `3000`, vinculada
+  a `127.0.0.1:$API_HOST_PORT` na VPS para o seu proxy. Restrinja o login SSH de `root`
   ao modo `forced-commands-only` se a política do host permitir; nunca libere shell geral para
-  a chave da pipeline. Não use o arquivo de ambiente da API como script de shell.
+  a chave da pipeline.
 
 ## Publicar e promover
 

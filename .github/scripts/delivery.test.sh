@@ -105,6 +105,15 @@ DRAFT=true TAG_EXISTS=yes assert_failure 'Expected a published stable release' \
   "${delivery[@]}" resolve production v0.1.0
 TAG_EXISTS=yes "${delivery[@]}" resolve production v0.1.0
 SSH_ORIGINAL_COMMAND="deploy $digest extra" assert_failure 'Expected deploy sha256:DIGEST' \
-  bash scripts/deploy-api.sh production 3300 db.example acadflow
+  bash scripts/deploy-api.sh production
+SSH_ORIGINAL_COMMAND="deploy $digest" assert_failure 'Missing runtime setting: API_HOST_PORT' \
+  bash scripts/deploy-api.sh production < /dev/null
+SSH_ORIGINAL_COMMAND="deploy $digest" assert_failure 'Invalid runtime setting: API_HOST_PORT' \
+  bash scripts/deploy-api.sh production < <(printf '%s\0' 'PATH=/tmp')
+SSH_ORIGINAL_COMMAND="deploy $digest" assert_failure 'Invalid API_HOST_PORT' \
+  bash scripts/deploy-api.sh production < <(printf '%s\0' \
+    'API_HOST_PORT=65536' 'CORS_ORIGIN=https://app.example.com' 'DB_HOST=db.example.com' \
+    'DB_PORT=5432' 'DB_USERNAME=app' 'DB_PASSWORD=not-real' 'DB_DATABASE=acadflow' \
+    'DB_SSL=true' 'JWT_SECRET=not-real' 'JWT_ACCESS_EXPIRES_IN=15m' 'I18N_FALLBACK_LANGUAGE=pt-BR')
 
 printf 'Delivery policy tests passed.\n'
