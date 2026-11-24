@@ -24,4 +24,3 @@ As funcionalidades pós-MVP de **foto de perfil** (`PerfilFoto`) e **anexos de a
 
 - **Positivas:** controle de acesso verificado no backend antes de emitir links temporários, zero tráfego de download pesado passando pelo Node.js após emissão da URL assinada e operação degradada segura quando R2 não está configurado.
 - **Negativas:** requer configuração de bucket R2 e política de CORS no provedor quando habilitado em staging/produção.
-

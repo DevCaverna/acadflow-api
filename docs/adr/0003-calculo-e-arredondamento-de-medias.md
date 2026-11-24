@@ -27,4 +27,3 @@ Centralizar o cálculo na função pura `calculateGradeAverage(values)`:
 
 - **Positivas:** resultado determinístico, idêntico ao apresentado na UI e facilmente testável em unidade (`grade-average.spec.ts`) sem dependências externas.
 - **Negativas:** caso médias ponderadas por peso de atividade sejam introduzidas no futuro, a assinatura de `calculateGradeAverage` precisará ser estendida mantendo a aritmética inteira.
-

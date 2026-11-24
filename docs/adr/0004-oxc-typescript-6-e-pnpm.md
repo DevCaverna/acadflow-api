@@ -25,4 +25,3 @@ Padronizar os repositórios de código (`acadflow-api` e `acadflow-web`) com:
 
 - **Positivas:** `pnpm pr` (`lint`, `format:check`, `typecheck`, `test:unit`, `build`) executa em segundos; consistência completa de tooling entre backend e frontend.
 - **Negativas:** exige configuração de extensão Oxc no VS Code ou Zed (`.vscode/` e `.zed/` já versionados) para feedback instantâneo no editor.
-

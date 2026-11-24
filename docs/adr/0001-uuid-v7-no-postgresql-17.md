@@ -24,4 +24,3 @@ Implementar a função SQL `public.uuid_generate_v7()` via migration manual (`17
 
 - **Positivas:** IDs ordenáveis temporalmente, excelente localidade de índice, independência de código na camada de aplicação e compatibilidade nativa com PostgreSQL 17.
 - **Negativas:** a migration cria uma função customizada no schema `public` (com `SET search_path = pg_catalog`), que precisará ser mantida até eventual migração para PostgreSQL 18+.
-

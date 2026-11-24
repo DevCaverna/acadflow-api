@@ -23,4 +23,3 @@ Definir **`ON DELETE RESTRICT`** em todas as chaves estrangeiras do banco de dad
 
 - **Positivas:** proteção garantida no banco e na API contra perda de histórico acadêmico; remoção de disciplina com matrículas/atividades, atividade com notas/anexos ou matrícula com notas é bloqueada de forma determinística.
 - **Negativas:** o usuário precisa remover dependências antes (quando aplicável), e a UI deve exibir mensagens claras de bloqueio quando receber `409 CONFLICT`.
-
