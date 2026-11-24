@@ -40,6 +40,8 @@ jobs:
         run: pnpm typecheck
       - name: Unit tests (without Docker)
         run: pnpm test:unit
+      - name: Release and deployment policy tests (mocked)
+        run: bash .github/scripts/delivery.test.sh
       - name: Integration and E2E (isolated PostgreSQL 17)
         run: pnpm test:docker 2
 
