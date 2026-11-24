@@ -6,5 +6,8 @@
   "NOT_FOUND": "Recurso não encontrado",
   "CONFLICT": "A operação conflita com os dados existentes",
   "STUDENT_NOT_ENROLLED": "O aluno não está matriculado na disciplina",
-  "INTERNAL_ERROR": "Ocorreu um erro inesperado"
+  "INTERNAL_ERROR": "Ocorreu um erro inesperado",
+  "INVALID_CURRENT_PASSWORD": "Senha atual incorreta",
+  "TOO_MANY_REQUESTS": "Muitas tentativas. Aguarde alguns minutos e tente de novo",
+  "STORAGE_UNAVAILABLE": "O envio de arquivos está indisponível"
 }

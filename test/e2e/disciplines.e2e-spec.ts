@@ -76,7 +76,9 @@ describe('GET /disciplines', () => {
   });
 
   afterAll(async () => {
-    await dataSource?.query('TRUNCATE grades, activities, enrollments, disciplines, users');
+    await dataSource?.query(
+      'TRUNCATE activity_attachments, grades, activities, enrollments, disciplines, users',
+    );
     await app?.close();
   });
 

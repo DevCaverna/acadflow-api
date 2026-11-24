@@ -84,3 +84,14 @@ O CI também executa os testes de integração e E2E isolados.
 Desenvolver em `feature/ACA-...`, integrar em `develop`, homologar em `staging` e estabilizar em `main`. **Branch não equivale automaticamente a deploy.**
 
 Para publicar uma versão ou implantar a API em `development`, `staging` ou `production`, consulte o [guia de releases e deploy](deploy.md). O Docker Compose deste guia é apenas para desenvolvimento e testes locais.
+
+## Criar contas fora do seed
+
+O seed é só para demonstração e recusa produção. Para criar uma conta, informe a senha por variável de ambiente, nunca como argumento:
+
+```bash
+read -rs USER_PASSWORD && export USER_PASSWORD
+pnpm user:create --name "Nome" --email nome@exemplo.com --role PROFESSOR
+```
+
+Na imagem de produção, que não inclui pnpm: `npm run user:create:prod -- --name ... --email ... --role ...`.

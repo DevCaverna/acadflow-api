@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
+import { MaxBytes } from '@/common/decorators/max-bytes.decorator';
+import { PASSWORD_MAX_BYTES } from '@/config/security.constants';
 
 export class LoginDto {
   @ApiProperty({ example: 'professor@acadflow.local' })
@@ -12,6 +14,6 @@ export class LoginDto {
   @ApiProperty()
   @IsString({ message: i18nValidationMessage('validation.isString') })
   @IsNotEmpty({ message: i18nValidationMessage('validation.isNotEmpty') })
-  @MaxLength(72, { message: i18nValidationMessage('validation.maxLength') })
+  @MaxBytes(PASSWORD_MAX_BYTES, { message: i18nValidationMessage('validation.maxBytes') })
   readonly password!: string;
 }

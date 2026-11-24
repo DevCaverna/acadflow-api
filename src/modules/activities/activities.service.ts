@@ -89,16 +89,27 @@ export class ActivitiesService {
     }
   }
 
-  private async findOwnedOrFail({
+  async findVisibleOrFail({ user, id }: { user: User; id: string }): Promise<Activity> {
+    const activity = await this.findByIdOrFail({ id });
+    await this.disciplinesService.findVisibleOrFail({ user, id: activity.disciplineId });
+    return activity;
+  }
+
+  async findOwnedOrFail({
     professorId,
     id,
   }: {
     professorId: string;
     id: string;
   }): Promise<Activity> {
+    const activity = await this.findByIdOrFail({ id });
+    await this.disciplinesService.findOwnedOrFail({ professorId, id: activity.disciplineId });
+    return activity;
+  }
+
+  private async findByIdOrFail({ id }: { id: string }): Promise<Activity> {
     const activity = await this.activityRepository.findOneBy({ id });
     if (!activity) throw new ApiException('NOT_FOUND');
-    await this.disciplinesService.findOwnedOrFail({ professorId, id: activity.disciplineId });
     return activity;
   }
 }

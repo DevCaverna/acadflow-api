@@ -14,6 +14,8 @@
     "filter": "filter",
     "sortField": "sort field",
     "sortDirection": "sort direction",
-    "search": "search"
+    "search": "search",
+    "currentPassword": "current password",
+    "newPassword": "new password"
   }
 }

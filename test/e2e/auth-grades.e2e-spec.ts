@@ -83,7 +83,7 @@ describe('Auth and grades', () => {
 
   afterAll(async () => {
     await dataSource?.query(
-      'TRUNCATE grades, activities, enrollments, disciplines, users RESTART IDENTITY',
+      'TRUNCATE activity_attachments, grades, activities, enrollments, disciplines, users',
     );
     await app?.close();
   });
@@ -93,7 +93,7 @@ describe('Auth and grades', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
       accessToken: expect.any(String) as string,
-      user: { id: student.id, name: 'Test', email: student.email, role: 'ALUNO' },
+      user: { id: student.id, name: 'Test', email: student.email, role: 'ALUNO', avatarUrl: null },
     });
   });
 
