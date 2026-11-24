@@ -1,0 +1,72 @@
+name: AcadFlow API CI
+
+on:
+  pull_request:
+    branches: [develop, staging, main]
+  push:
+    branches: [develop, staging, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: acadflow-api-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: API / Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.4.2
+          run_install: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Oxlint
+        run: pnpm lint
+      - name: Oxfmt
+        run: pnpm format:check
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit tests (without Docker)
+        run: pnpm test:unit
+      - name: Release and deployment policy tests (mocked)
+        run: bash .github/scripts/delivery.test.sh
+      - name: Integration and E2E (isolated PostgreSQL 17)
+        run: pnpm test:docker 2
+
+  build:
+    name: API / Build
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.4.2
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build API
+        run: pnpm build
+      - name: Upload API build (not deployment)
+        uses: actions/upload-artifact@v4
+        with:
+          name: acadflow-api-dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,16 @@
+{
+  "isNotEmpty": "O campo {property} é obrigatório",
+  "isString": "O campo {property} deve ser um texto",
+  "isEmail": "O campo {property} deve ser um e-mail válido",
+  "isUuid": "O campo {property} deve ser um UUID válido",
+  "isNumber": "O campo {property} deve ser um número com até uma casa decimal",
+  "isDateString": "O campo {property} deve ser uma data ISO 8601 válida",
+  "min": "O campo {property} deve ser no mínimo {constraints.0}",
+  "max": "O campo {property} deve ser no máximo {constraints.0}",
+  "minLength": "O campo {property} deve ter no mínimo {constraints.0} caracteres",
+  "maxLength": "O campo {property} deve ter no máximo {constraints.0} caracteres",
+  "isInt": "O campo {property} deve ser um número inteiro",
+  "isIn": "O campo {property} tem um valor não permitido",
+  "isObject": "O campo {property} deve ser um objeto JSON",
+  "semester": "O campo {property} deve seguir o formato 2026.1 ou 2026.2"
+}

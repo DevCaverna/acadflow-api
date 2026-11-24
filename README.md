@@ -1,20 +1,18 @@
 <div align="center">
   <img src="docs/assets/icon.svg" width="110" alt="Ícone do AcadFlow" />
 
-  # AcadFlow — API
+# AcadFlow — API
 
-  API de gestão acadêmica para organizar disciplinas, atividades e notas.
+API de gestão acadêmica para organizar disciplinas, atividades e notas.
 
-  [Documentação no Linear](https://linear.app/acadflow/document/acadflow-inicio-e-documentacao-9f01545a3125)
+[Documentação no Linear](https://linear.app/acadflow/document/acadflow-inicio-e-documentacao-9f01545a3125)
 </div>
 
 ## Sobre
 
 A API do AcadFlow atende professores, que cadastram disciplinas, atividades e notas, e alunos, que acompanham o próprio desempenho. A autenticação usa login e senha, com hash bcrypt e JWT, e o acesso é controlado por perfil (`PROFESSOR` e `ALUNO`).
 
-**Tecnologias:** `NestJS` · `TypeScript` · `PostgreSQL` · `TypeORM` · `JWT` · `bcrypt` · `Jest` · `Supertest` · `GitHub Actions`
-
-> Projeto em fase inicial: o código ainda não foi adicionado.
+**Tecnologias:** `NestJS` · `TypeScript` · `PostgreSQL` · `TypeORM` · `JWT` · `bcrypt` · `Vitest` · `Supertest` · `GitHub Actions`
 
 ## Arquitetura
 
@@ -40,18 +38,20 @@ sequenceDiagram
 
 ## Endpoints
 
-| Método | Rota | O que faz |
-| --- | --- | --- |
-| `POST` | `/auth/register` | Cadastra um usuário |
-| `POST` | `/auth/login` | Autentica e retorna o JWT |
-| `GET` | `/disciplines` | Lista disciplinas |
-| `POST` | `/disciplines` | Cadastra uma disciplina (professor) |
-| `GET` | `/activities` | Lista atividades |
-| `POST` | `/activities` | Cria uma atividade (professor) |
-| `GET` | `/grades` | Consulta notas |
-| `POST` | `/grades` | Lança uma nota (professor) |
+| Método         | Rota                                | O que faz                     |
+| -------------- | ----------------------------------- | ----------------------------- |
+| `GET`          | `/health`                           | Estado da API e do banco      |
+| `POST`         | `/auth/login`                       | Autentica e retorna o JWT     |
+| `GET`          | `/auth/me`                          | Retorna o usuário autenticado |
+| `GET` / `POST` | `/disciplines`                      | Lista ou cadastra disciplinas |
+| `GET`          | `/disciplines/:id`                  | Consulta uma disciplina       |
+| `GET`          | `/disciplines/:id/students`         | Lista alunos matriculados     |
+| `GET` / `POST` | `/disciplines/:id/activities`       | Lista ou cria atividades      |
+| `GET`          | `/disciplines/:id/grades`           | Notas da turma (professor)    |
+| `GET`          | `/disciplines/:id/grades/me`        | Notas e média do aluno        |
+| `PUT`          | `/activities/:id/grades/:studentId` | Lança ou atualiza uma nota    |
 
-> Rotas previstas, sujeitas a mudança na implementação.
+> Rotas do MVP. Detalhes em [contratos-api.md](docs/contratos-api.md).
 
 ## Como executar
 
@@ -61,22 +61,22 @@ pnpm install
 pnpm start:dev
 ```
 
-> Comandos previstos: passam a valer quando a estrutura inicial for adicionada.
+> Exige PostgreSQL em execução. Veja [docs/execucao](docs/execucao/README.md) para rodar com Docker.
 
 ## Documentação
 
-| Página | O que terá |
-| --- | --- |
-| [Linear](https://linear.app/acadflow/document/acadflow-inicio-e-documentacao-9f01545a3125) | Início e documentação do projeto |
-| `docs/stack.md` | Tecnologias, versões e responsabilidades |
-| `docs/arquitetura.md` | Organização, decisões e integrações |
-| `docs/configuracao.md` | Variáveis de ambiente e inicialização |
-| `docs/testes.md` | Tipos de teste, execução e scripts |
-| `docs/CI.md` | Pipelines, CHANGELOG e versionamento |
-| `docs/diagramas/modelo-de-dados.md` | Entidades, tabelas e relacionamentos |
-| `docs/diagramas/sequencia.md` | Fluxos principais e requisições |
-
-> Os arquivos de `docs/` serão criados ao longo do projeto.
+| Página                                                                                     | O que tem                                |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| [Linear](https://linear.app/acadflow/document/acadflow-inicio-e-documentacao-9f01545a3125) | Início e documentação do projeto         |
+| [Execução](docs/execucao/README.md)                                                        | Como rodar, testar e resolver problemas  |
+| [Arquitetura](docs/arquitetura.md)                                                         | Organização e decisões                   |
+| [Configuração](docs/configuracao.md)                                                       | Variáveis de ambiente                    |
+| [Testes](docs/testes.md)                                                                   | Tipos de teste e comandos                |
+| [CI](docs/CI.md)                                                                           | Pipeline e branches                      |
+| [Qualidade e editores](docs/qualidade-e-editores.md)                                       | Oxlint, Oxfmt, TypeScript, VS Code e Zed |
+| [Contratos REST](docs/contratos-api.md)                                                    | Rotas, tipos e erros                     |
+| [Migrations](docs/migrations.md)                                                           | Padrão de migrations                     |
+| [AGENTS.md](AGENTS.md)                                                                     | Diretrizes para colaboradores e agentes  |
 
 ## Repositórios
 
