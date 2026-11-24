@@ -88,9 +88,7 @@ export class DisciplinesService {
   }
 
   async findOne({ user, id }: { user: User; id: string }): Promise<DisciplineResponseDto> {
-    const discipline = await this.findByIdOrFail({ id });
-    await this.assertCanView({ user, discipline });
-    return DisciplineResponseDto.from(discipline);
+    return DisciplineResponseDto.from(await this.findVisibleOrFail({ user, id }));
   }
 
   async update({
@@ -124,6 +122,24 @@ export class DisciplinesService {
     }
   }
 
+  async findVisibleOrFail({ user, id }: { user: User; id: string }): Promise<Discipline> {
+    const discipline = await this.findByIdOrFail({ id });
+    await this.assertCanView({ user, discipline });
+    return discipline;
+  }
+
+  async findOwnedOrFail({
+    professorId,
+    id,
+  }: {
+    professorId: string;
+    id: string;
+  }): Promise<Discipline> {
+    const discipline = await this.findByIdOrFail({ id });
+    if (discipline.professorId !== professorId) throw new ApiException('FORBIDDEN');
+    return discipline;
+  }
+
   private createDisciplineQuery(): SelectQueryBuilder<Discipline> {
     return this.disciplineRepository
       .createQueryBuilder('discipline')
@@ -136,18 +152,6 @@ export class DisciplinesService {
       .where('discipline.id = :id', { id })
       .getOne();
     if (!discipline) throw new ApiException('NOT_FOUND');
-    return discipline;
-  }
-
-  private async findOwnedOrFail({
-    professorId,
-    id,
-  }: {
-    professorId: string;
-    id: string;
-  }): Promise<Discipline> {
-    const discipline = await this.findByIdOrFail({ id });
-    if (discipline.professorId !== professorId) throw new ApiException('FORBIDDEN');
     return discipline;
   }
 

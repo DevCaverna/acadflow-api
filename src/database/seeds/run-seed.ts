@@ -1,4 +1,5 @@
 import dataSource from '@/database/data-source';
+import { seedAcademicData } from '@/database/seeds/seed-academic-data';
 import { seedUsers } from '@/database/seeds/seed-users';
 
 async function run(): Promise<void> {
@@ -10,6 +11,7 @@ async function run(): Promise<void> {
   await dataSource.initialize();
   try {
     await seedUsers(dataSource, password);
+    await seedAcademicData(dataSource);
   } finally {
     await dataSource.destroy();
   }
