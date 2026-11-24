@@ -6,6 +6,7 @@ fail() { printf 'Delivery: %s\n' "$*" >&2; exit 1; }
 repo="repos/${GITHUB_REPOSITORY:?}"
 image="ghcr.io/${GITHUB_REPOSITORY,,}"
 signer="${GITHUB_SERVER_URL:?}/${GITHUB_REPOSITORY}/.github/workflows/publish-snapshot.yml@refs/heads/main"
+snapshot_signer="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/.github/workflows/deploy-snapshot.yml@refs/heads/main"
 sha_pattern='[0-9a-f]{40}'
 digest_pattern='sha256:[0-9a-f]{64}'
 version_pattern='(0|[1-9][0-9]*)'
@@ -25,10 +26,16 @@ branch_tip() { gh api "$repo/git/ref/heads/$1" --jq '.object.sha'; }
 
 verify_candidate() {
   tree=$(commit_tree "$revision")
-  local -a identity=(--certificate-identity "$signer"
-    --certificate-oidc-issuer 'https://token.actions.githubusercontent.com')
-  cosign verify "${identity[@]}" -a "revision=$revision" -a "tree=$tree" "$image@$digest" > /dev/null
-  cosign verify-attestation "${identity[@]}" --type spdxjson "$image@$digest" > /dev/null
+  local issuer='https://token.actions.githubusercontent.com' workflow
+  for workflow in "$snapshot_signer" "$signer"; do
+    if cosign verify --certificate-identity "$workflow" --certificate-oidc-issuer "$issuer" \
+      -a "revision=$revision" -a "tree=$tree" "$image@$digest" > /dev/null; then
+      cosign verify-attestation --certificate-identity "$workflow" --certificate-oidc-issuer "$issuer" \
+        --type spdxjson "$image@$digest" > /dev/null
+      return
+    fi
+  done
+  fail 'Candidate signature could not be verified.'
 }
 
 require_branch_ci() {
@@ -45,21 +52,42 @@ require_main_commit() {
   require_branch_ci main "$1"
 }
 
+deployment_records() {
+  gh api --paginate --method GET "$repo/deployments" \
+    -f environment="$1" -f task=acadflow-image -F per_page=100 "${@:2}" |
+    jq -rs 'add // [] | sort_by(.created_at, .id) | reverse | .[] |
+      select(.creator.login == "github-actions[bot]") |
+      [.id, .sha, ((.payload | if type == "string" then fromjson? else . end).digest // "")] | @tsv'
+}
+
+deployment_succeeded() {
+  gh api --paginate "$repo/deployments/$1/statuses" |
+    jq -es 'any(.[][]; .state == "success")' > /dev/null
+}
+
 require_previous_deploy() {
-  local target=$1 records id
-  records=$(gh api --paginate --method GET "$repo/deployments" \
-    -f sha="$revision" -f environment="$target" -f task=acadflow-image -F per_page=100 |
-    jq -r --arg digest "$digest" '
-      .[] | select(.creator.login == "github-actions[bot]") |
-      select((.payload | if type == "string" then fromjson? else . end).digest == $digest) | .id')
-  while IFS= read -r id; do
-    [[ -n $id ]] || continue
-    if gh api --paginate "$repo/deployments/$id/statuses" |
-      jq -es 'any(.[][]; .state == "success")' > /dev/null; then
-      return
-    fi
+  local target=$1 records id sha recorded_digest
+  records=$(deployment_records "$target" -f sha="$revision")
+  while IFS=$'\t' read -r id sha recorded_digest; do
+    [[ $id =~ ^[0-9]+$ && $sha == "$revision" && $recorded_digest == "$digest" ]] || continue
+    if deployment_succeeded "$id"; then return 0; fi
   done <<< "$records"
   fail "No successful $target deployment for $revision@$digest."
+}
+
+# A merge can change the SHA without changing its tree.
+find_promoted_candidate() {
+  local target=$1 wanted_tree=$2 records id sha recorded_digest
+  records=$(deployment_records "$target") || return 1
+  while IFS=$'\t' read -r id sha recorded_digest; do
+    [[ $id =~ ^[0-9]+$ && $sha =~ ^$sha_pattern$ && $recorded_digest =~ ^$digest_pattern$ ]] || continue
+    [[ $(commit_tree "$sha") == "$wanted_tree" ]] || continue
+    if deployment_succeeded "$id"; then
+      printf '%s@%s\n' "$sha" "$recorded_digest"
+      return 0
+    fi
+  done <<< "$records"
+  return 0
 }
 
 release_metadata() {
@@ -83,18 +111,27 @@ require_tag() {
 }
 
 create_release() {
-  local version=$1 main_commit=$3 metadata existing notes id
+  local version=$1 candidate=$2 main_commit=$3 metadata existing notes id main_tree
   validate_version "$version"
   [[ $main_commit =~ ^$sha_pattern$ ]] || fail 'Invalid main commit.'
   require_main_commit "$main_commit"
-  parse_candidate "$2"
+  main_tree=$(commit_tree "$main_commit")
+  existing=$(gh api --paginate "$repo/releases?per_page=100" |
+    jq -c --arg version "$version" '.[] | select(.tag_name == $version)')
+  if [[ -z $candidate ]]; then
+    if [[ -n $existing ]]; then
+      candidate=$(release_metadata <<< "$existing" | jq -er '.candidate')
+    else
+      candidate=$(find_promoted_candidate staging "$main_tree")
+      [[ -n $candidate ]] || fail 'No successful staging deployment matches main HEAD. Deploy a matching snapshot first.'
+    fi
+  fi
+  parse_candidate "$candidate"
   verify_candidate
-  [[ $(commit_tree "$main_commit") == "$tree" ]] || fail 'Candidate tree differs from main.'
+  [[ $main_tree == "$tree" ]] || fail 'Candidate tree differs from main.'
   require_previous_deploy staging
   metadata=$(jq -cn --arg candidate "$revision@$digest" --arg commit "$main_commit" \
     '{candidate: $candidate, commit: $commit}')
-  existing=$(gh api --paginate "$repo/releases?per_page=100" |
-    jq -c --arg version "$version" '.[] | select(.tag_name == $version)')
   if [[ -n $existing ]]; then
     jq -e '.prerelease == false' <<< "$existing" > /dev/null ||
       fail "Release $version already exists as a prerelease."
@@ -117,6 +154,33 @@ create_release() {
     return
   fi
   gh api --method PATCH "$repo/releases/$id" -F draft=false --jq .html_url
+}
+
+resolve_snapshot() {
+  local target=$1 branch=$2 commit=$3 tip wanted_tree candidate
+  case "$target" in development | staging) ;; *) fail 'Unknown snapshot environment.' ;; esac
+  case "$branch" in develop | staging) ;; *) fail 'Select develop or staging.' ;; esac
+  tip=$(branch_tip "$branch")
+  commit=${commit:-$tip}
+  [[ $commit =~ ^$sha_pattern$ && $tip =~ ^$sha_pattern$ ]] || fail 'Expected a full commit SHA.'
+  if [[ $commit != "$tip" ]]; then
+    gh api "$repo/compare/$commit...$tip" --jq '.status' | grep -Ex 'ahead|identical' > /dev/null ||
+      fail "Commit is not in $branch."
+  fi
+  require_branch_ci "$branch" "$commit"
+  wanted_tree=$(commit_tree "$commit")
+  candidate=$(find_promoted_candidate development "$wanted_tree")
+  if [[ -z $candidate ]]; then
+    [[ $target == development ]] || fail 'No successful development deployment matches this commit. Deploy to development first.'
+    revision=$commit
+    digest=
+  else
+    parse_candidate "$candidate"
+    verify_candidate
+    [[ $tree == "$wanted_tree" ]] || fail 'Candidate tree differs from the selected commit.'
+  fi
+  printf 'revision=%s\ndigest=%s\n' "$revision" "$digest" >> "${GITHUB_OUTPUT:?}"
+  printf 'Source: %s at %s\n' "$branch" "$commit" >> "${GITHUB_STEP_SUMMARY:?}"
 }
 
 resolve_deploy() {
@@ -164,5 +228,6 @@ resolve_deploy() {
 case ${1:-} in
   release) [[ $# == 4 ]] || fail 'Expected version, candidate and main commit.'; create_release "$2" "$3" "$4" ;;
   resolve) [[ $# == 3 ]] || fail 'Expected environment and version/candidate.'; resolve_deploy "$2" "$3" ;;
+  snapshot) [[ $# == 4 ]] || fail 'Expected environment, branch and optional commit.'; resolve_snapshot "$2" "$3" "$4" ;;
   *) fail 'Unknown operation.' ;;
 esac
