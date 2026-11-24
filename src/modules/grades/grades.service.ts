@@ -106,7 +106,11 @@ export class GradesService {
 
   private summarize({ grades }: { grades: Grade[] }): GradeSummaryDto {
     return {
-      grades: grades.map(({ activityId, value }) => ({ activityId, value })),
+      grades: grades.map(({ activityId, value, updatedAt }) => ({
+        activityId,
+        value,
+        updatedAt: updatedAt.toISOString(),
+      })),
       ...calculateGradeAverage(grades.map(({ value }) => value)),
     };
   }
