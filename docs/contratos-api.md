@@ -10,7 +10,7 @@ Base: `http://localhost:3000` · JSON · `Authorization: Bearer <JWT>` · `Accep
 type Role = 'PROFESSOR' | 'ALUNO';
 type GradeStatus = 'NO_GRADES' | 'APPROVED' | 'RECOVERY' | 'FAILED';
 
-type User = { id: string; name: string; email: string; role: Role };
+type User = { id: string; name: string; email: string; role: Role; avatarUrl: string | null };
 type Session = { accessToken: string; user: User };
 type Discipline = {
   id: string;
@@ -29,12 +29,19 @@ type Activity = {
 };
 type Grade = { activityId: string; studentId: string; value: number };
 type GradeSummary = {
-  grades: Array<{ activityId: string; value: number }>;
+  grades: Array<{ activityId: string; value: number; updatedAt: string }>;
   average: number | null;
   status: GradeStatus;
 };
 type StudentGrades = GradeSummary & { student: { id: string; name: string; email: string } };
 type Listing<T> = { page: number; perPage: number; total: number; data: T[] };
+type Attachment = {
+  id: string;
+  name: string;
+  mimeType: string;
+  sizeBytes: number;
+  uploadedAt: string;
+};
 type ApiError = { statusCode: number; code: string; message: string };
 ```
 
@@ -83,7 +90,10 @@ Todas são do professor responsável. Não há exclusão em cascata.
 - **Matrículas manuais** (professor responsável): `GET /disciplines/:id/students/candidates?search=` (mínimo 3 letras, até 10 alunos não matriculados), `POST /disciplines/:id/students/:studentId` (`201`; repetida `409`) e `DELETE` na mesma rota (`204`; com notas na disciplina `409`).
 - **Login:** depois de 5 tentativas em 15 minutos por e-mail e IP, `429 TOO_MANY_REQUESTS`. O login correto zera a contagem, que fica em memória em cada instância.
 - **Perfil:** `GET` e `PATCH /users/me` (`{ name?, email? }`, `200 User`; e-mail em uso retorna `409`) e `PATCH /users/me/password` (`{ currentPassword, newPassword }`, `204`). Senha de 8 caracteres a 72 bytes. O papel nunca é editável.
-- Avatar (R2/Sharp), anexos e notificações.
+- **Avatar:** `POST /users/me/avatar` (multipart `file`; PNG, JPG ou WebP, até 2 MB; vira WebP 256×256; `200 User`) e `DELETE` (`204`). `avatarUrl` é assinada e vale 5 minutos.
+- **Anexos** (PDF, PNG ou JPG, até 10 MB): `GET` e `POST /activities/:id/attachments` (multipart `file`, `201 Attachment`), `GET /attachments/:id/url` (`{ url }`, 5 minutos) e `DELETE /attachments/:id` (`204`). Professor responsável envia e remove; aluno matriculado baixa. Atividade com anexos não pode ser excluída (`409`).
+- Sem R2 configurado, o envio retorna `503 STORAGE_UNAVAILABLE`.
+- **Avisos:** derivados na Web, sem rota própria.
 
 ## Regras
 
@@ -108,6 +118,7 @@ Todas são do professor responsável. Não há exclusão em cascata.
 | `409`  | `CONFLICT`                 | Duplicidade ou exclusão bloqueada              |
 | `422`  | `STUDENT_NOT_ENROLLED`     | Nota para aluno não matriculado                |
 | `429`  | `TOO_MANY_REQUESTS`        | Muitas tentativas de login                     |
+| `503`  | `STORAGE_UNAVAILABLE`      | Armazenamento de arquivos desligado            |
 | `500`  | `INTERNAL_ERROR`           | Falha inesperada                               |
 
 `message` é traduzida conforme `Accept-Language`; `code` e enums nunca são traduzidos. Sem o cabeçalho, ou com idioma não suportado, a resposta vem em `pt-BR`. Em `VALIDATION_ERROR`, `message` reúne as mensagens dos campos separadas por `; `. Outros status `4xx`, como `413`, mantêm o status e usam `VALIDATION_ERROR`.

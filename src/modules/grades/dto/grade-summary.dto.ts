@@ -8,6 +8,9 @@ export class ActivityGradeDto {
 
   @ApiProperty()
   readonly value!: number;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  readonly updatedAt!: string;
 }
 
 export class GradeSummaryDto {

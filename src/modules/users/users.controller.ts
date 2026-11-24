@@ -1,8 +1,22 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiErrors } from '@/common/decorators/api-errors.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { FILE_BODY, RequiredFilePipe } from '@/common/pipes/required-file.pipe';
 import { Auth } from '@/modules/auth/auth.decorator';
+import { AvatarsService } from '@/modules/users/avatars.service';
 import { ChangePasswordDto } from '@/modules/users/dto/change-password.dto';
 import { UpdateProfileDto } from '@/modules/users/dto/update-profile.dto';
 import { UserResponseDto } from '@/modules/users/dto/user-response.dto';
@@ -13,14 +27,17 @@ import { UsersService } from '@/modules/users/users.service';
 @Controller('users/me')
 @Auth()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly avatarsService: AvatarsService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Consultar o próprio perfil' })
   @ApiResponse({ status: HttpStatus.OK, type: UserResponseDto })
   @ApiErrors(HttpStatus.UNAUTHORIZED)
-  me(@CurrentUser() user: User): UserResponseDto {
-    return UserResponseDto.from(user);
+  me(@CurrentUser() user: User): Promise<UserResponseDto> {
+    return this.avatarsService.toResponse({ user });
   }
 
   @Patch()
@@ -44,5 +61,34 @@ export class UsersController {
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
     return this.usersService.changePassword({ userId: user.id, changePasswordDto });
+  }
+
+  @Post('avatar')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody(FILE_BODY)
+  @ApiOperation({ summary: 'Enviar foto de perfil em PNG, JPG ou WebP' })
+  @ApiResponse({ status: HttpStatus.OK, type: UserResponseDto })
+  @ApiErrors(
+    HttpStatus.BAD_REQUEST,
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.PAYLOAD_TOO_LARGE,
+    HttpStatus.SERVICE_UNAVAILABLE,
+  )
+  updateAvatar(
+    @CurrentUser() user: User,
+    @UploadedFile(RequiredFilePipe) file: Express.Multer.File,
+  ): Promise<UserResponseDto> {
+    return this.avatarsService.update({ user, body: file.buffer });
+  }
+
+  @Delete('avatar')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remover a foto de perfil' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiErrors(HttpStatus.UNAUTHORIZED)
+  removeAvatar(@CurrentUser() user: User): Promise<void> {
+    return this.avatarsService.remove({ user });
   }
 }
