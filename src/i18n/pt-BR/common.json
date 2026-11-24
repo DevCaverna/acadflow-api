@@ -8,6 +8,12 @@
     "description": "descrição",
     "title": "título",
     "dueAt": "prazo",
-    "value": "nota"
+    "value": "nota",
+    "page": "página",
+    "perPage": "itens por página",
+    "filter": "filtro",
+    "sortField": "campo de ordenação",
+    "sortDirection": "direção da ordenação",
+    "search": "busca"
   }
 }

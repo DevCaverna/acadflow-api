@@ -8,5 +8,8 @@
   "min": "O campo {property} deve ser no mínimo {constraints.0}",
   "max": "O campo {property} deve ser no máximo {constraints.0}",
   "minLength": "O campo {property} deve ter no mínimo {constraints.0} caracteres",
-  "maxLength": "O campo {property} deve ter no máximo {constraints.0} caracteres"
+  "maxLength": "O campo {property} deve ter no máximo {constraints.0} caracteres",
+  "isInt": "O campo {property} deve ser um número inteiro",
+  "isIn": "O campo {property} tem um valor não permitido",
+  "isObject": "O campo {property} deve ser um objeto JSON"
 }
