@@ -9,5 +9,6 @@ import { Enrollment } from '@/modules/enrollments/entities/enrollment.entity';
   imports: [TypeOrmModule.forFeature([Discipline, Enrollment])],
   controllers: [DisciplinesController],
   providers: [DisciplinesService],
+  exports: [DisciplinesService],
 })
 export class DisciplinesModule {}

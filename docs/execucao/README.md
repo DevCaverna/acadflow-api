@@ -14,7 +14,7 @@ cp .env.example .env
 pnpm install
 pnpm migration:show
 pnpm migration:run
-pnpm seed   # usuários de demonstração; definir SEED_PASSWORD no .env
+pnpm seed   # usuários, disciplina, matrículas e atividades de demonstração; definir SEED_PASSWORD no .env
 pnpm start:dev
 ```
 
