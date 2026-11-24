@@ -12,14 +12,9 @@ Este guia descreve como subir os serviços do **AcadFlow** em conjunto na máqui
 
 ---
 
-## 1. Alinhamento de Branches (Importante)
+## 1. Versão para desenvolvimento local
 
-| Repositório    | Branch recomendada                                                         | Observação                                                                                                         |
-| -------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `acadflow-api` | `develop` (ou `feature/ACA-25-storage-api` para perfil/matrículas/storage) | Em `develop`/`main` está todo o fluxo MVP; perfil/matrículas manuais/anexos/avatares estão em `ACA-24` e `ACA-25`. |
-| `acadflow-web` | `develop`                                                                  | A branch `main` da Web contém apenas o README inicial; todo o app React está em `develop`.                         |
-
-> Ao rodar `acadflow-web` (`develop`) contra `acadflow-api` (`develop`), login, disciplinas, atividades e notas funcionam normalmente. As telas pós-MVP de perfil, matrícula manual, upload de avatar e anexos dependem dos endpoints de `ACA-24` / `ACA-25` (com `R2_ENABLED=false`, uploads retornam `503 STORAGE_UNAVAILABLE`).
+Use `main` atualizada nos dois repositórios. Os endpoints de perfil, matrícula manual, avatares e anexos já estão integrados na API. Com `R2_ENABLED=false`, os uploads retornam `503 STORAGE_UNAVAILABLE`.
 
 ---
 
@@ -68,7 +63,7 @@ Valide a API antes de iniciar o frontend:
 
 ## 3. Subir `acadflow-web`
 
-Na pasta `acadflow-web` (na branch `develop`):
+Na pasta `acadflow-web`:
 
 ```bash
 cp .env.example .env
@@ -107,5 +102,5 @@ As contas criadas por `pnpm seed` usam a senha definida em `SEED_PASSWORD`:
 
 - **Erro de CORS no navegador:** confirme `CORS_ORIGIN=http://localhost:5173` na API (sem barra `/` no final) e reinicie a API.
 - **Porta 5432 ocupada no host:** no `compose.dev.yml`, a porta publicada do PostgreSQL é controlada por `DB_HOST_PORT` (padrão `5433`).
-- **`acadflow-web` sem `package.json`:** você está na branch `main`; faça checkout em `develop`.
+- **`acadflow-web` sem `package.json`:** confirme que está na raiz do repositório e que a cópia local de `main` está atualizada.
 - **404 nas rotas de perfil, matrículas ou anexos:** verifique se a API está em uma branch que contenha `ACA-24`/`ACA-25`.

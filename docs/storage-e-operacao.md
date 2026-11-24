@@ -2,7 +2,7 @@
 
 Este guia cobre as operações administrativas e de armazenamento de arquivos introduzidas nas branches pós-MVP **`feature/ACA-24-profile-api`** e **`feature/ACA-25-storage-api`**.
 
-> **Nota de estado das branches:** Em `develop`/`main`, o módulo `src/modules/storage/` ainda está reservado (`.gitkeep`) e as variáveis `R2_*` permanecem desabilitadas por padrão (`R2_ENABLED=false`). Os fluxos abaixo passam a valer assim que `ACA-24` e `ACA-25` forem integradas.
+> Perfil e storage já estão integrados em `main`. Avatares e anexos exigem R2 configurado; o storage permanece desabilitado por padrão (`R2_ENABLED=false`).
 
 ---
 

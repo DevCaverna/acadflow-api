@@ -81,7 +81,7 @@ O CI também executa os testes de integração e E2E isolados.
 
 ## Ambientes Git
 
-Desenvolver em `feature/ACA-...`, integrar em `develop`, homologar em `staging` e estabilizar em `main`. **Branch não equivale automaticamente a deploy.**
+Desenvolva em `feature/ACA-...` a partir de `main` e integre via PR revisado com CI verde. **Merge não dispara deploy.**
 
 Para publicar uma versão ou implantar a API em `development`, `staging` ou `production`, consulte o [guia de releases e deploy](deploy.md). O Docker Compose deste guia é apenas para desenvolvimento e testes locais.
 

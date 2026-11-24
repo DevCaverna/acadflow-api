@@ -2,9 +2,9 @@ name: AcadFlow API CI
 
 on:
   pull_request:
-    branches: [develop, staging, main]
+    branches: [main]
   push:
-    branches: [develop, staging, main]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
