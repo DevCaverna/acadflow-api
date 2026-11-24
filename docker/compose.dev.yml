@@ -4,6 +4,7 @@ services:
   postgres:
     image: postgres:17-alpine
     environment:
+      TZ: UTC
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_DATABASE}
@@ -26,6 +27,7 @@ services:
         condition: service_healthy
     env_file: ../.env
     environment:
+      TZ: UTC
       DB_HOST: postgres
       DB_PORT: 5432
     ports:
