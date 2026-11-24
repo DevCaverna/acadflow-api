@@ -5,14 +5,18 @@ import { Repository } from 'typeorm';
 import { isUniqueViolation } from '@/common/database/postgres-error';
 import { ApiException } from '@/common/filters/api.exception';
 import { BCRYPT_ROUNDS } from '@/config/security.constants';
+import { AvatarsService } from '@/modules/users/avatars.service';
 import type { ChangePasswordDto } from '@/modules/users/dto/change-password.dto';
 import type { UpdateProfileDto } from '@/modules/users/dto/update-profile.dto';
-import { UserResponseDto } from '@/modules/users/dto/user-response.dto';
+import type { UserResponseDto } from '@/modules/users/dto/user-response.dto';
 import { User } from '@/modules/users/entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly avatarsService: AvatarsService,
+  ) {}
 
   findById({ id }: { id: string }): Promise<User | null> {
     return this.userRepository.findOneBy({ id });
@@ -46,7 +50,7 @@ export class UsersService {
         throw error;
       }
     }
-    return UserResponseDto.from(Object.assign(user, changes));
+    return this.avatarsService.toResponse({ user: Object.assign(user, changes) });
   }
 
   async changePassword({

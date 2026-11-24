@@ -15,7 +15,13 @@ export class UserResponseDto {
   @ApiProperty({ enum: ROLES })
   readonly role!: Role;
 
-  static from({ id, name, email, role }: User): UserResponseDto {
-    return { id, name, email, role };
+  @ApiProperty({ type: String, nullable: true, description: 'URL assinada, válida por 5 minutos' })
+  readonly avatarUrl!: string | null;
+
+  static from(
+    { id, name, email, role }: User,
+    { avatarUrl }: { avatarUrl: string | null },
+  ): UserResponseDto {
+    return { id, name, email, role, avatarUrl };
   }
 }

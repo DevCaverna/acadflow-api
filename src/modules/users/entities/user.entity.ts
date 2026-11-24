@@ -24,6 +24,9 @@ export class User {
   @Column({ type: 'varchar', length: 16 })
   role!: Role;
 
+  @Column({ name: 'avatar_key', type: 'text', nullable: true })
+  avatarKey!: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;
 

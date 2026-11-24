@@ -6,13 +6,17 @@ import { Auth } from '@/modules/auth/auth.decorator';
 import { AuthService } from '@/modules/auth/auth.service';
 import { LoginDto } from '@/modules/auth/dto/login.dto';
 import { SessionDto } from '@/modules/auth/dto/session.dto';
+import { AvatarsService } from '@/modules/users/avatars.service';
 import { UserResponseDto } from '@/modules/users/dto/user-response.dto';
 import { User } from '@/modules/users/entities/user.entity';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly avatarsService: AvatarsService,
+  ) {}
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -28,7 +32,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Consultar o usuário autenticado' })
   @ApiResponse({ status: HttpStatus.OK, type: UserResponseDto })
   @ApiErrors(HttpStatus.UNAUTHORIZED)
-  me(@CurrentUser() user: User): UserResponseDto {
-    return UserResponseDto.from(user);
+  me(@CurrentUser() user: User): Promise<UserResponseDto> {
+    return this.avatarsService.toResponse({ user });
   }
 }

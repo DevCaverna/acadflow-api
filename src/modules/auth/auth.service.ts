@@ -6,7 +6,7 @@ import { BCRYPT_ROUNDS } from '@/config/security.constants';
 import type { LoginDto } from '@/modules/auth/dto/login.dto';
 import type { SessionDto } from '@/modules/auth/dto/session.dto';
 import { LoginAttemptsService } from '@/modules/auth/login-attempts.service';
-import { UserResponseDto } from '@/modules/users/dto/user-response.dto';
+import { AvatarsService } from '@/modules/users/avatars.service';
 import { UsersService } from '@/modules/users/users.service';
 
 @Injectable()
@@ -16,6 +16,7 @@ export class AuthService {
   constructor(
     private readonly users: UsersService,
     private readonly jwt: JwtService,
+    private readonly avatarsService: AvatarsService,
     private readonly loginAttempts: LoginAttemptsService,
   ) {}
 
@@ -28,7 +29,7 @@ export class AuthService {
     this.loginAttempts.clear({ email, ip });
     return {
       accessToken: await this.jwt.signAsync({ sub: user.id }),
-      user: UserResponseDto.from(user),
+      user: await this.avatarsService.toResponse({ user }),
     };
   }
 }
