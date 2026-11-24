@@ -69,7 +69,7 @@ describe('Auth and grades', () => {
     ]);
     const disciplineId = await insert(
       'INSERT INTO disciplines (code, name, semester, professor_id) VALUES ($1, $2, $3, $4)',
-      [randomUUID().slice(0, 8), 'Test', '2026/2', owner.id],
+      [randomUUID().slice(0, 8), 'Test', '2026.2', owner.id],
     );
     activityId = await insert('INSERT INTO activities (discipline_id, title) VALUES ($1, $2)', [
       disciplineId,

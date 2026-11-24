@@ -18,7 +18,7 @@ scripts/migration-create.mjs
 ## Decisões
 
 - Um módulo por domínio. Validações em DTOs, regras em services, autorização no backend.
-- Dados de notas: 0 a 10; média >=7 aprovado, 5 a <7 recuperação, <5 reprovado; sem notas = SEM_NOTAS.
+- Dados de notas: 0 a 10; média >=7 aprovado, 5 a <7 recuperação, <5 reprovado; sem notas = NO_GRADES.
 - Não usar `synchronize: true`; evolução de esquema por migrations manuais.
 - `pt-BR` é o idioma padrão; erros estruturados têm `code` estável.
 - Erros de regra: `throw new ApiException('INVALID_CREDENTIALS')`. `ApiExceptionFilter` traduz `errors.<code>` e nunca expõe a mensagem interna da exceção.
