@@ -55,6 +55,13 @@ describe('Auth and grades', () => {
       .send({ value });
   }
 
+  function removeGrade(account: Account, studentId = student.id, id = activityId) {
+    return request(app.getHttpServer())
+      .delete(`/activities/${id}/grades/${studentId}`)
+      .set('Accept-Language', 'en')
+      .auth(account.token, { type: 'bearer' });
+  }
+
   beforeAll(async () => {
     process.env.DB_DATABASE = getWorkerDatabaseName();
     const module = await Test.createTestingModule({ imports: [AppModule] }).compile();
@@ -171,6 +178,30 @@ describe('Auth and grades', () => {
       [activityId],
     );
     expect(rows).toEqual([{ value: '7.5' }]);
+  });
+
+  it('removes a saved grade and enforces authorization and enrollment rules', async () => {
+    expect((await removeGrade(student)).body).toMatchObject({ statusCode: 403, code: 'FORBIDDEN' });
+    expect((await removeGrade(otherProfessor)).body).toMatchObject({
+      statusCode: 403,
+      code: 'FORBIDDEN',
+    });
+    expect((await removeGrade(owner, outsider.id)).body).toMatchObject({
+      statusCode: 422,
+      code: 'STUDENT_NOT_ENROLLED',
+    });
+    expect((await removeGrade(owner, student.id, randomUUID())).body).toMatchObject({
+      statusCode: 404,
+      code: 'NOT_FOUND',
+    });
+
+    const deleted = await removeGrade(owner);
+    expect(deleted.status).toBe(204);
+    expect(deleted.headers['x-request-id']).toMatch(/^[0-9a-f-]{36}$/i);
+
+    const missing = await removeGrade(owner).set('X-Request-Id', 'trace-grade-delete');
+    expect(missing.body).toMatchObject({ statusCode: 404, code: 'NOT_FOUND' });
+    expect(missing.headers['x-request-id']).toBe('trace-grade-delete');
   });
 
   it('seeds demo users repeatedly without duplicates', async () => {

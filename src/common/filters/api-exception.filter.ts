@@ -10,6 +10,7 @@ import {
 import type { Request, Response } from 'express';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiException } from '@/common/filters/api.exception';
+import { ensureRequestId } from '@/common/http/request-id';
 import type { ApiError, ErrorCode } from '@/common/types/api-error';
 
 const VALIDATION_KEY_PREFIX = 'validation.';
@@ -30,13 +31,15 @@ export class ApiExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const http = host.switchToHttp();
+    const request = http.getRequest<Request>();
     const response = http.getResponse<Response>();
+    const requestId = ensureRequestId(request, response);
     const statusCode = this.getStatus(exception);
     const code = this.getCode(exception, statusCode);
 
     if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
       this.logger.error(
-        'Unhandled exception',
+        `Unhandled exception [${requestId}] ${request.method} ${request.originalUrl}`,
         exception instanceof Error ? exception.stack : String(exception),
       );
     }
@@ -45,7 +48,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
       return;
     }
 
-    const lang = this.getLanguage(http.getRequest<Request>(), host);
+    const lang = this.getLanguage(request, host);
     const body: ApiError = { statusCode, code, message: this.getMessage(exception, code, lang) };
     response.status(statusCode).json(body);
   }

@@ -1,11 +1,12 @@
 import { join } from 'node:path';
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AcceptLanguageResolver, I18nModule } from 'nestjs-i18n';
 import { ApiExceptionFilter } from '@/common/filters/api-exception.filter';
 import { ApiException } from '@/common/filters/api.exception';
+import { RequestLoggingInterceptor } from '@/common/interceptors/request-logging.interceptor';
 import { getDatabaseOptions } from '@/config/database.config';
 import { ActivitiesModule } from '@/modules/activities/activities.module';
 import { AuthModule } from '@/modules/auth/auth.module';
@@ -33,6 +34,7 @@ import { HealthModule } from '@/modules/health/health.module';
     HealthModule,
   ],
   providers: [
+    { provide: APP_INTERCEPTOR, useClass: RequestLoggingInterceptor },
     { provide: APP_FILTER, useClass: ApiExceptionFilter },
     {
       provide: APP_PIPE,
