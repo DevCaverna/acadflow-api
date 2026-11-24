@@ -13,7 +13,7 @@ export class DisciplineFilterDto {
   @MaxLength(120, { message: i18nValidationMessage('validation.maxLength') })
   readonly search?: string;
 
-  @ApiPropertyOptional({ example: '2026/2' })
+  @ApiPropertyOptional({ example: '2026.2' })
   @IsOptional()
   @IsString({ message: i18nValidationMessage('validation.isString') })
   @MaxLength(7, { message: i18nValidationMessage('validation.maxLength') })

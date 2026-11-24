@@ -65,10 +65,10 @@ describe('GET /disciplines', () => {
     professorToken = professor.token;
     studentToken = student.token;
 
-    await createDiscipline(professor.id, 'A1', 'Algebra', '2026/1');
-    await createDiscipline(professor.id, 'B1', 'Banco_de dados', '2026/2');
-    const enrolled = await createDiscipline(professor.id, 'C1', 'Calculo', '2026/2');
-    await createDiscipline(otherProfessor.id, 'D1', 'Design', '2026/2');
+    await createDiscipline(professor.id, 'A1', 'Algebra', '2026.1');
+    await createDiscipline(professor.id, 'B1', 'Banco_de dados', '2026.2');
+    const enrolled = await createDiscipline(professor.id, 'C1', 'Calculo', '2026.2');
+    await createDiscipline(otherProfessor.id, 'D1', 'Design', '2026.2');
     await dataSource.query('INSERT INTO enrollments (student_id, discipline_id) VALUES ($1, $2)', [
       student.id,
       enrolled,
@@ -114,7 +114,7 @@ describe('GET /disciplines', () => {
   });
 
   it.each([
-    [{ semester: '2026/2' }, ['B1', 'C1']],
+    [{ semester: '2026.2' }, ['B1', 'C1']],
     [{ search: 'alg' }, ['A1']],
     [{ search: 'c1' }, ['C1']],
     [{ search: '_' }, ['B1']],

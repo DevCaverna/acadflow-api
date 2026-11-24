@@ -22,7 +22,7 @@ export class DisciplineResponseDto {
   @ApiProperty({ type: String, nullable: true })
   readonly description!: string | null;
 
-  @ApiProperty({ example: '2026/2' })
+  @ApiProperty({ example: '2026.2' })
   readonly semester!: string;
 
   @ApiProperty({ type: DisciplineProfessorDto })

@@ -42,7 +42,7 @@
 - [ ] Nenhum `console.log` ou código comentado desnecessário
 - [ ] Mensagens são traduzidas por `nestjs-i18n` em `pt-BR`, quando aplicável
 - [ ] O backend valida propriedade/matrícula e papéis `PROFESSOR` / `ALUNO`
-- [ ] Médias seguem o design: >= 7 aprovado; 5 a < 7 recuperação; < 5 reprovado; sem avaliações = `SEM_NOTAS`
+- [ ] Médias seguem o design: >= 7 aprovado; 5 a < 7 recuperação; < 5 reprovado; sem avaliações = `NO_GRADES`
 - [ ] Dados sensíveis e senhas não vazam nas respostas; bcrypt é usado para armazenamento de senha
 - [ ] Migrations TypeORM manuais têm `up()` e `down()`; `synchronize: false`
 - [ ] Contratos REST e Swagger atualizados quando as rotas ou DTOs mudaram
