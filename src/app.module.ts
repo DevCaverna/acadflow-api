@@ -7,17 +7,25 @@ import { AcceptLanguageResolver, I18nModule } from 'nestjs-i18n';
 import { ApiExceptionFilter } from '@/common/filters/api-exception.filter';
 import { ApiException } from '@/common/filters/api.exception';
 import { getDatabaseOptions } from '@/config/database.config';
+import { AuthModule } from '@/modules/auth/auth.module';
+import { DisciplinesModule } from '@/modules/disciplines/disciplines.module';
+import { GradesModule } from '@/modules/grades/grades.module';
 import { HealthModule } from '@/modules/health/health.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRootAsync({ useFactory: getDatabaseOptions }),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({ ...getDatabaseOptions(), autoLoadEntities: true }),
+    }),
     I18nModule.forRoot({
       fallbackLanguage: process.env.I18N_FALLBACK_LANGUAGE ?? 'pt-BR',
       loaderOptions: { path: join(__dirname, 'i18n'), watch: false },
       resolvers: [AcceptLanguageResolver],
     }),
+    AuthModule,
+    DisciplinesModule,
+    GradesModule,
     HealthModule,
   ],
   providers: [
@@ -28,6 +36,7 @@ import { HealthModule } from '@/modules/health/health.module';
         new ValidationPipe({
           whitelist: true,
           transform: true,
+          stopAtFirstError: true,
           validationError: { target: false, value: false },
           exceptionFactory: (errors) => new ApiException('VALIDATION_ERROR', errors),
         }),

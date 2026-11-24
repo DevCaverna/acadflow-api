@@ -34,10 +34,11 @@ type GradeSummary = {
   status: GradeStatus;
 };
 type StudentGrades = GradeSummary & { student: { id: string; name: string; email: string } };
+type Listing<T> = { page: number; perPage: number; total: number; data: T[] };
 type ApiError = { statusCode: number; code: string; message: string };
 ```
 
-IDs são UUID, datas são ISO 8601 em UTC e notas são números JSON.
+IDs são UUID v7, datas são ISO 8601 em UTC e notas são números JSON.
 
 ## MVP
 
@@ -46,7 +47,7 @@ IDs são UUID, datas são ISO 8601 em UTC e notas são números JSON.
 | `GET`  | `/health`                           | Público                                    | —                                        | Estado da API e do banco         |
 | `POST` | `/auth/login`                       | Público                                    | `{ email, password }`                    | `200 Session`                    |
 | `GET`  | `/auth/me`                          | Autenticado                                | —                                        | `200 User`                       |
-| `GET`  | `/disciplines`                      | Professor: as suas; aluno: as matriculadas | —                                        | `200 Discipline[]`               |
+| `GET`  | `/disciplines`                      | Professor: as suas; aluno: as matriculadas | —                                        | `200 Listing<Discipline>`        |
 | `POST` | `/disciplines`                      | Professor                                  | `{ code, name, semester, description? }` | `201 Discipline`                 |
 | `GET`  | `/disciplines/:id`                  | Professor responsável ou aluno matriculado | —                                        | `200 Discipline`                 |
 | `GET`  | `/disciplines/:id/students`         | Professor responsável                      | —                                        | `200 Array<{ id, name, email }>` |
@@ -57,6 +58,12 @@ IDs são UUID, datas são ISO 8601 em UTC e notas são números JSON.
 | `PUT`  | `/activities/:id/grades/:studentId` | Professor responsável                      | `{ value }`                              | `200 Grade`                      |
 
 O `PUT` lança ou atualiza a nota: repetir a chamada não cria outra.
+
+### Paginação
+
+Aplicada em `GET /disciplines`. Query: `page` (padrão 1), `perPage` (padrão 20, máximo 100), `filter` (JSON), `sortField` e `sortDirection` (`asc` ou `desc`).
+
+`GET /disciplines` filtra por `search` (nome ou código) e `semester`, e ordena por `code`, `name` (padrão) ou `semester`. Campo fora da lista retorna `400 VALIDATION_ERROR`.
 
 ## Opcionais (depois do fluxo principal)
 

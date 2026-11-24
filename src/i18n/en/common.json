@@ -8,6 +8,12 @@
     "description": "description",
     "title": "title",
     "dueAt": "due date",
-    "value": "grade"
+    "value": "grade",
+    "page": "page",
+    "perPage": "items per page",
+    "filter": "filter",
+    "sortField": "sort field",
+    "sortDirection": "sort direction",
+    "search": "search"
   }
 }

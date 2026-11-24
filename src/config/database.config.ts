@@ -10,7 +10,6 @@ export function getDatabaseOptions(): DataSourceOptions {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
     ssl: process.env.DB_SSL === 'true',
-    entities: [join(__dirname, '../modules/**/*.entity.{ts,js}')],
     migrations: [join(__dirname, '../database/migrations/*.{ts,js}')],
     synchronize: false,
     migrationsRun: false,
