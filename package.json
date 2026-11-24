@@ -23,6 +23,7 @@
     "start:prod": "node dist/main.js",
     "migration:run": "pnpm build && typeorm migration:run -d dist/database/data-source.js",
     "migration:show": "pnpm build && typeorm migration:show -d dist/database/data-source.js",
+    "migration:run:prod": "typeorm migration:run -d dist/database/data-source.js",
     "migration:revert": "pnpm build && typeorm migration:revert -d dist/database/data-source.js"
   },
   "dependencies": {
