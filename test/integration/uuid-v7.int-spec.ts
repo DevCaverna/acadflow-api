@@ -25,6 +25,7 @@ describe('UUID v7', () => {
     );
     expect(rows.map(({ table }) => table)).toEqual([
       'activities',
+      'activity_attachments',
       'disciplines',
       'grades',
       'users',
