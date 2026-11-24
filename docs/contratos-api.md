@@ -97,4 +97,4 @@ Todas são do professor responsável. Não há exclusão em cascata.
 | `422`  | `STUDENT_NOT_ENROLLED` | Nota para aluno não matriculado                |
 | `500`  | `INTERNAL_ERROR`       | Falha inesperada                               |
 
-`message` é traduzida conforme `Accept-Language`; `code` e enums nunca são traduzidos.
+`message` é traduzida conforme `Accept-Language`; `code` e enums nunca são traduzidos. Sem o cabeçalho, ou com idioma não suportado, a resposta vem em `pt-BR`. Em `VALIDATION_ERROR`, `message` reúne as mensagens dos campos separadas por `; `. Outros status `4xx`, como `413`, mantêm o status e usam `VALIDATION_ERROR`.
