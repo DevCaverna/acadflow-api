@@ -150,6 +150,12 @@ describe('Profile', () => {
     await expect(create({ email: email.toUpperCase() })).rejects.toThrow('already exists');
   });
 
+  it('blocks login after repeated failures, even with the right password', async () => {
+    for (let count = 0; count < 5; count++) await login(email, 'wrong').expect(401);
+    const response = await login(email, PASSWORD);
+    expect(response.body).toMatchObject({ statusCode: 429, code: 'TOO_MANY_REQUESTS' });
+  });
+
   it('runs the process in UTC', () => {
     expect(new Date(0).getTimezoneOffset()).toBe(0);
   });

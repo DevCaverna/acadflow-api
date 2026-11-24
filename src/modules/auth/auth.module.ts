@@ -4,6 +4,7 @@ import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from '@/modules/auth/auth.controller';
 import { AuthService } from '@/modules/auth/auth.service';
+import { LoginAttemptsService } from '@/modules/auth/login-attempts.service';
 import { JwtStrategy } from '@/modules/auth/strategies/jwt.strategy';
 import { UsersModule } from '@/modules/users/users.module';
 
@@ -26,6 +27,6 @@ import { UsersModule } from '@/modules/users/users.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, LoginAttemptsService, JwtStrategy],
 })
 export class AuthModule {}

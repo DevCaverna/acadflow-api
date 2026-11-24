@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Ip, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiErrors } from '@/common/decorators/api-errors.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
@@ -18,9 +18,9 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Autenticar com e-mail e senha' })
   @ApiResponse({ status: HttpStatus.OK, type: SessionDto })
-  @ApiErrors(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED)
-  login(@Body() loginDto: LoginDto): Promise<SessionDto> {
-    return this.authService.login({ loginDto });
+  @ApiErrors(HttpStatus.BAD_REQUEST, HttpStatus.UNAUTHORIZED, HttpStatus.TOO_MANY_REQUESTS)
+  login(@Body() loginDto: LoginDto, @Ip() ip: string): Promise<SessionDto> {
+    return this.authService.login({ loginDto, ip });
   }
 
   @Get('me')
