@@ -71,7 +71,9 @@ describe('Activities, enrollments and grades', () => {
   });
 
   beforeEach(async () => {
-    await dataSource.query('TRUNCATE grades, activities, enrollments, disciplines, users');
+    await dataSource.query(
+      'TRUNCATE activity_attachments, grades, activities, enrollments, disciplines, users',
+    );
     [owner, otherProfessor, student, classmate, outsider] = await Promise.all([
       createUser('PROFESSOR', 'Owner'),
       createUser('PROFESSOR', 'Other'),
@@ -92,7 +94,9 @@ describe('Activities, enrollments and grades', () => {
   });
 
   afterAll(async () => {
-    await dataSource?.query('TRUNCATE grades, activities, enrollments, disciplines, users');
+    await dataSource?.query(
+      'TRUNCATE activity_attachments, grades, activities, enrollments, disciplines, users',
+    );
     await app?.close();
   });
 
@@ -242,8 +246,8 @@ describe('Activities, enrollments and grades', () => {
       {
         student: { id: student.id, name: 'Bia', email: student.email },
         grades: [
-          { activityId: first.id, value: 8 },
-          { activityId: second.id, value: 6 },
+          { activityId: first.id, value: 8, updatedAt: expect.any(String) as string },
+          { activityId: second.id, value: 6, updatedAt: expect.any(String) as string },
         ],
         average: 7,
         status: 'APPROVED',
@@ -271,7 +275,7 @@ describe('Activities, enrollments and grades', () => {
     ]);
     const path = `/disciplines/${disciplineId}/grades/me`;
     expect((await call(student, 'get', path).expect(200)).body).toEqual({
-      grades: [{ activityId: id, value: 6 }],
+      grades: [{ activityId: id, value: 6, updatedAt: expect.any(String) as string }],
       average: 6,
       status: 'RECOVERY',
     });

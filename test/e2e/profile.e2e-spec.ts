@@ -55,7 +55,9 @@ describe('Profile', () => {
   });
 
   afterAll(async () => {
-    await dataSource?.query('TRUNCATE grades, activities, enrollments, disciplines, users');
+    await dataSource?.query(
+      'TRUNCATE activity_attachments, grades, activities, enrollments, disciplines, users',
+    );
     await app?.close();
   });
 
@@ -69,7 +71,13 @@ describe('Profile', () => {
     });
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({ name: 'Ana Maria', email: other, role: 'ALUNO' });
-    expect(Object.keys(response.body as object).sort()).toEqual(['email', 'id', 'name', 'role']);
+    expect(Object.keys(response.body as object).sort()).toEqual([
+      'avatarUrl',
+      'email',
+      'id',
+      'name',
+      'role',
+    ]);
     const me = await request(app.getHttpServer()).get('/users/me').auth(token, { type: 'bearer' });
     expect(me.body).toEqual(response.body);
     expect((await patch('/users/me', {})).body).toEqual(response.body);
