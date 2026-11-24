@@ -11,5 +11,6 @@
   "maxLength": "O campo {property} deve ter no máximo {constraints.0} caracteres",
   "isInt": "O campo {property} deve ser um número inteiro",
   "isIn": "O campo {property} tem um valor não permitido",
-  "isObject": "O campo {property} deve ser um objeto JSON"
+  "isObject": "O campo {property} deve ser um objeto JSON",
+  "semester": "O campo {property} deve seguir o formato 2026.1 ou 2026.2"
 }

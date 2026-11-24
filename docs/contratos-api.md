@@ -8,7 +8,7 @@ Base: `http://localhost:3000` · JSON · `Authorization: Bearer <JWT>` · `Accep
 
 ```ts
 type Role = 'PROFESSOR' | 'ALUNO';
-type GradeStatus = 'SEM_NOTAS' | 'APROVADO' | 'RECUPERACAO' | 'REPROVADO';
+type GradeStatus = 'NO_GRADES' | 'APPROVED' | 'RECOVERY' | 'FAILED';
 
 type User = { id: string; name: string; email: string; role: Role };
 type Session = { accessToken: string; user: User };
@@ -87,9 +87,10 @@ Todas são do professor responsável. Não há exclusão em cascata.
 
 - **Nota:** de 0 a 10, com até uma casa decimal. Ausência de nota nunca é `0`.
 - **Média:** aritmética das notas lançadas, arredondada uma vez para uma casa decimal; o valor arredondado define a situação.
-- **Situação:** `>= 7` `APROVADO`; `>= 5` e `< 7` `RECUPERACAO`; `< 5` `REPROVADO`; sem notas, `average: null` e `SEM_NOTAS`.
+- **Situação:** `>= 7` `APPROVED`; `>= 5` e `< 7` `RECOVERY`; `< 5` `FAILED`; sem notas, `average: null` e `NO_GRADES`.
 - A Web apresenta a média como **parcial** enquanto houver atividades sem nota.
-- `(code, semester)` é único por disciplina.
+- `(code, semester)` é único por disciplina; repetir retorna `409 CONFLICT`. `semester` segue `2026.1` ou `2026.2`. `code` e `semester` não mudam depois da criação.
+- `PATCH /disciplines/:id` aceita `description: null` para remover a descrição e retorna `200 Discipline`. `DELETE /disciplines/:id` retorna `204`.
 
 ## Erros
 
