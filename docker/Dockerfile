@@ -1,4 +1,4 @@
-FROM node:24-trixie-slim AS base
+FROM node:25-trixie-slim AS base
 RUN npm install --global pnpm@12.4.2
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -11,7 +11,7 @@ RUN pnpm build
 FROM base AS deps
 RUN pnpm install --frozen-lockfile --prod
 
-FROM node:24-trixie-slim
+FROM node:25-trixie-slim
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
