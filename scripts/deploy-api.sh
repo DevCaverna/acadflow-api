@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# Installed by the VPS operator as a root-owned SSH forced command.
+# Executed from the trusted workflow checkout over SSH.
 set -euo pipefail
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin
 umask 077
 
 fail() { printf 'Deploy: %s\n' "$*" >&2; exit 1; }
 
-[[ $# == 1 ]] || fail 'Expected a fixed environment.'
+[[ $# == 2 ]] || fail 'Expected an environment and image digest.'
 environment=$1
+digest=$2
 case $environment in
   development | staging | production) ;;
   *) fail 'Unknown environment.' ;;
 esac
-command_pattern='^deploy (sha256:[0-9a-f]{64})$'
-[[ ${SSH_ORIGINAL_COMMAND:-} =~ $command_pattern ]] || fail 'Expected deploy sha256:DIGEST.'
-image="ghcr.io/devcaverna/acadflow-api@${BASH_REMATCH[1]}"
+[[ $digest =~ ^sha256:[0-9a-f]{64}$ ]] || fail 'Expected sha256:DIGEST.'
+image="ghcr.io/devcaverna/acadflow-api@$digest"
 
 keys=(API_HOST_PORT CORS_ORIGIN DB_HOST DB_PORT DB_USERNAME DB_PASSWORD DB_DATABASE DB_SSL
   JWT_SECRET JWT_ACCESS_EXPIRES_IN I18N_FALLBACK_LANGUAGE)
@@ -37,10 +37,17 @@ if ! [[ $host_port =~ ^[0-9]{1,5}$ ]] || ! ((10#$host_port >= 1 && 10#$host_port
 fi
 host_port=$((10#$host_port))
 [[ $DB_SSL == true || $DB_SSL == false ]] || fail 'DB_SSL must be true or false.'
+if [[ $DB_HOST == host.docker.internal ]]; then
+  options+=(--add-host host.docker.internal:host-gateway)
+fi
 if ! [[ $DB_PORT =~ ^[0-9]{1,5}$ ]] || ! ((10#$DB_PORT >= 1 && 10#$DB_PORT <= 65535)); then
   fail 'Invalid DB_PORT.'
 fi
 unset entry value
+IFS= read -r -d '' -t 10 -n 256 ghcr_username && [[ $ghcr_username =~ ^[a-zA-Z0-9_-]+(\[bot\])?$ ]] ||
+  fail 'Missing or invalid GHCR username.'
+IFS= read -r -d '' -t 10 -n 8193 ghcr_token && [[ -n $ghcr_token && ${#ghcr_token} -lt 8193 ]] ||
+  fail 'Missing or invalid GHCR token.'
 
 name="acadflow-api-$environment"
 previous="$name-previous"
@@ -68,7 +75,18 @@ healthy() {
     "http://127.0.0.1:$host_port/health") && [[ $status == 200 ]]
 }
 
-docker pull "$image"
+pull_image() (
+  registry_config=$(mktemp -d) || exit 1
+  trap 'rm -f -- "$registry_config/config.json"; rmdir -- "$registry_config"' EXIT
+  # A real auth entry prevents Docker from selecting a host credential helper.
+  auth=$(printf '%s:%s' "$ghcr_username" "$ghcr_token" | base64 -w 0) || exit 1
+  printf '{"auths":{"ghcr.io":{"auth":"%s"}}}\n' "$auth" > "$registry_config/config.json" || exit 1
+  docker --config "$registry_config" pull "$image"
+)
+if ! pull_image; then
+  fail 'GHCR pull failed. Verify that this repository has Actions read access to the package.'
+fi
+unset ghcr_username ghcr_token
 
 keep_current=false
 if exists "$name" && { ! exists "$previous" || healthy; }; then

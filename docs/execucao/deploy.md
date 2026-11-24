@@ -7,9 +7,8 @@ externos ao projeto.
 
 ## Primeira configuração
 
-Os workflows de entrega precisam existir na branch padrão (`main`). Depois da primeira promoção
-por PR até `main`, use um novo push nas branches de origem para gerar candidatas; execuções de CI
-de PR ou manuais não publicam imagens.
+Os workflows de entrega precisam existir na branch padrão (`main`). A entrega é acionada
+manualmente; um push ou uma execução da CI não publica nem implanta imagens por si só.
 
 1. Proteja `develop`, `staging` e `main` com revisão e CI obrigatórios. Configure regras para
    impedir alteração/exclusão de tags `v*`, preservando a criação pelo workflow. Restrinja alterações
@@ -22,8 +21,10 @@ de PR ou manuais não publicam imagens.
 3. Em cada Environment, configure as variables e secrets da tabela abaixo. Na mesma VPS,
    `DEPLOY_HOST`, `DEPLOY_PORT` e `DEPLOY_KNOWN_HOSTS` podem ser iguais; use uma chave SSH,
    uma porta HTTP local e um banco distintos por ambiente.
-4. O GHCR precisa permitir publicação por este repositório. Caso o pacote seja privado,
-   configure o login Docker de `root` na VPS com credencial **somente de leitura** do pacote.
+4. O GHCR precisa permitir publicação e leitura pelo GitHub Actions deste repositório.
+   O pull na VPS usa o `GITHUB_TOKEN` do job (`packages: read`), inclusive para pacote
+   privado. Não cadastre outro secret nem faça login persistente na VPS: o token segue
+   pelo SSH e a configuração temporária do Docker é removida depois do pull.
    Não remova do GHCR a imagem, a assinatura nem a atestação de versões que ainda podem ser
    implantadas.
 
@@ -31,6 +32,7 @@ de PR ou manuais não publicam imagens.
 | -------- | ------------------------ | --------------------------------------------------------------------------------- |
 | Variable | `DEPLOY_HOST`            | DNS ou IPv4 da VPS.                                                               |
 | Variable | `DEPLOY_PORT`            | Porta SSH; padrão `22`.                                                           |
+| Variable | `DEPLOY_SSH_USER`        | Usuário Linux para o login SSH; padrão `admin`.                                   |
 | Variable | `API_HOST_PORT`          | Porta HTTP local; por exemplo, `3100`, `3200`, `3300`.                            |
 | Variable | `CORS_ORIGIN`            | Origem pública do frontend do ambiente.                                           |
 | Variable | `DB_HOST`                | Host do PostgreSQL externo.                                                       |
@@ -50,44 +52,50 @@ de PR ou manuais não publicam imagens.
 
 ### Contrato com a VPS
 
-- Host Linux `amd64` com Bash, Docker Engine, `curl` e `flock` (`util-linux`).
-- Instale `scripts/deploy-api.sh` como `/usr/local/bin/acadflow-deploy`, executável e gravável
-  somente por `root`. Atualize o comando no host manualmente quando houver mudanças nele; o
-  workflow não envia scripts ao servidor.
-- O workflow envia as configurações do ambiente pela entrada padrão do SSH. O comando só
+- Host Linux `amd64` com Bash, Docker Engine, `curl`, `base64` (GNU coreutils) e `flock` (`util-linux`).
+- O workflow envia `scripts/deploy-api.sh` do checkout da `main` a cada execução. Não há
+  script de deploy para instalar na VPS. As configurações viajam separadamente pela entrada
+  padrão do SSH, sem aparecer nos argumentos remotos. O script só
   aceita as chaves de runtime previstas e as repassa ao Docker sem gravar arquivos `.env`
   na VPS. O Docker guarda as variáveis na configuração dos contêineres; quem tem acesso
   administrativo ao Docker pode inspecioná-las, inclusive no contêiner de rollback.
-- Em `root` → `authorized_keys`, associe a chave de cada ambiente a um comando fixo:
+- No `~/.ssh/authorized_keys` do usuário configurado em `DEPLOY_SSH_USER` (por padrão,
+  `/home/admin/.ssh/authorized_keys`), cadastre a chave pública dedicada de cada ambiente:
 
   ```text
-  restrict,command="/usr/local/bin/acadflow-deploy production" ssh-ed25519 <chave-publica>
+  restrict ssh-ed25519 <chave-publica>
   ```
 
-  O único argumento fixo é o ambiente. A API escuta no contêiner na porta `3000`, vinculada
-  a `127.0.0.1:$API_HOST_PORT` na VPS para o seu proxy. Restrinja o login SSH de `root`
-  ao modo `forced-commands-only` se a política do host permitir; nunca libere shell geral para
-  a chave da pipeline.
+  O workflow autentica com esse usuário e usa `sudo -n` para executar o script com privilégios
+  de `root`. A conta precisa autorizar essa operação sem senha e sem exigir TTY. `restrict`
+  desabilita TTY e encaminhamento, mas a chave ainda dá acesso aos privilégios da conta.
+  Não é necessário habilitar login SSH direto como `root`.
+
+- A API escuta no contêiner na porta `3000`, vinculada a `127.0.0.1:$API_HOST_PORT` na VPS.
+  Se o PostgreSQL já provisionado estiver acessível no host Docker, `DB_HOST=host.docker.internal`
+  adiciona o mapeamento `host-gateway` à migration e à API. Nenhum banco é criado pelo deploy.
 
 ## Publicar e promover
 
-1. **Publish Snapshot** roda depois da CI verde de um push em `develop` ou `staging`. Faz o
-   build com `docker/Dockerfile`, envia a imagem ao GHCR, bloqueia vulnerabilidades críticas
-   detectadas pelo Trivy, gera SBOM SPDX e assina imagem e SBOM com Cosign/OIDC. A candidata
-   `COMMIT@sha256:DIGEST` aparece no resumo apenas após sucesso. Uma imagem enviada por uma
-   execução que falhou na verificação não é uma candidata válida para o deploy.
-2. Em **Deploy**, selecione `main`, `development` e informe a candidata. Em seguida, depois
-   da promoção do código por PR e da CI verde em `staging`, use **Deploy** para `staging` com a
-   mesma candidata. O workflow exige deploy bem-sucedido em `development` e que a árvore Git
-   da imagem corresponda à ponta testada de `staging`. Um SHA de merge diferente é permitido,
-   mas um conteúdo diferente exige validar outra candidata desde `development`.
+1. Abra **Deploy Snapshot** e execute o workflow a partir de `main`. Selecione
+   `environment=development` e `branch=develop`. O campo `commit` pode ficar vazio para
+   usar o HEAD da branch escolhida quando o job resolver a origem. Se preenchido, use o SHA
+   Git completo de um commit dessa branch. O commit precisa de CI verde de push na branch.
+   O workflow reutiliza a imagem já implantada com sucesso em `development` para o mesmo conteúdo.
+   Sem uma imagem reutilizável, faz o build pelo `docker/Dockerfile`, publica no GHCR, bloqueia
+   vulnerabilidades críticas com Trivy e assina a imagem e o SBOM SPDX com Cosign/OIDC.
+2. Depois do PR `develop → staging` e da CI verde, execute **Deploy Snapshot** novamente
+   com `environment=staging` e `branch=staging`. O workflow procura um deploy bem-sucedido em
+   `development` com a mesma árvore Git e reutiliza seu digest. Um SHA de merge diferente é
+   permitido; sem conteúdo correspondente, não há deploy nem rebuild.
 3. Depois do PR `staging → main` e da CI verde, execute **Create Release** a partir de `main`.
-   Informe `vX.Y.Z` e a candidata homologada. O workflow verifica o deploy em `staging` e a
-   igualdade do conteúdo com o commit da `main`, cria uma tag leve e publica a GitHub Release
-   com a referência por digest. Se falhar após criar tag ou draft, reexecute os jobs que
-   falharam para manter a mesma versão, candidata e commit.
+   Informe `vX.Y.Z`; o workflow usa o HEAD da `main` no momento do acionamento e seleciona
+   o deploy bem-sucedido mais recente em `staging` com a mesma árvore Git. Para escolher outra
+   imagem homologada, informe `candidate` no formato `COMMIT@sha256:DIGEST`. O workflow
+   publica a tag e a GitHub Release com o digest verificado. Se falhar após criar tag ou draft,
+   reexecute os jobs que falharam para manter a mesma versão, candidata e commit.
    Não retague nem sobrescreva uma versão publicada.
-4. Para produção, execute **Deploy** em `main`, selecione `production` e informe a versão
+4. Para produção, execute **Deploy Release** em `main` e informe a versão
    `vX.Y.Z`. Confira o digest no resumo do job de verificação. Antes de aprovar, confirme
    o banco de destino, um backup recente com caminho de restauração conhecido e a compatibilidade
    do esquema com a versão que ficará no ar durante a migration. O histórico de deployments

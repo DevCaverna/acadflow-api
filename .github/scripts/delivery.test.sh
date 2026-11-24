@@ -8,27 +8,38 @@ export GITHUB_OUTPUT="$temp/output" GITHUB_STEP_SUMMARY="$temp/summary"
 export writes="$temp/writes"
 printf -v candidate_commit '%040d' 1
 printf -v main_commit '%040d' 2
+printf -v older_commit '%040d' 4
 printf -v digest 'sha256:%064d' 3
 candidate="$candidate_commit@$digest"
-export candidate_commit main_commit digest candidate
+export candidate_commit main_commit older_commit
+export fixture_digest="$digest" fixture_candidate="$candidate"
 
 gh() {
   local args="$*" tag_ref='refs/tags/v0.1.0' body
-  body=$(jq -cn --arg candidate "$candidate" --arg commit "$main_commit" \
+  body=$(jq -cn --arg candidate "$fixture_candidate" --arg commit "$main_commit" \
     '{candidate: $candidate, commit: $commit}')
   case $args in
     *"/compare/$main_commit...main"*) printf 'ahead\n' ;;
+    *"/compare/$older_commit...$main_commit"*) printf '%s\n' "${COMPARE_STATUS:-ahead}" ;;
     *'/actions/workflows/ci.yml/runs '*)
-      jq -cn --arg commit "$main_commit" \
-        '{workflow_runs: [{head_sha: $commit, conclusion: "success"}]}'
+      local commit=$main_commit
+      if [[ $args == *"head_sha=$older_commit"* ]]; then commit=$older_commit; fi
+      jq -cn --arg commit "$commit" --arg result "${CI_RESULT:-success}" \
+        '{workflow_runs: [{head_sha: $commit, conclusion: $result}]}'
       ;;
     *"/git/commits/$candidate_commit"*) printf 'signed-tree\n' ;;
+    *"/git/commits/$older_commit"*) printf 'other-tree\n' ;;
     *"/git/commits/$main_commit"*) printf '%s\n' "${TARGET_TREE:-signed-tree}" ;;
-    *'/git/ref/heads/staging'*) printf '%s\n' "$main_commit" ;;
+    *'/git/ref/heads/staging'* | *'/git/ref/heads/develop'*) printf '%s\n' "$main_commit" ;;
     *'/deployments/123/statuses'*) printf '[{"state":"success"}]\n' ;;
+    *'/deployments/124/statuses'*) printf '[{"state":"failure"}]\n' ;;
     *'/deployments '*)
-      jq -cn --arg digest "${DEPLOYED_DIGEST:-$digest}" \
-        '[{id: 123, creator: {login: "github-actions[bot]"}, payload: {digest: $digest}}]'
+      jq -cn --arg digest "${DEPLOYED_DIGEST:-$fixture_digest}" --arg sha "$candidate_commit" \
+        --argjson omit "${NO_DEPLOYMENT:-false}" '
+          if $omit then [] else
+            [124, 123] | map({id: ., sha: $sha, creator: {login: "github-actions[bot]"},
+              payload: {digest: $digest}})
+          end'
       ;;
     *'/git/matching-refs/tags/v0.1.0')
       if [[ ${TAG_EXISTS:-} == yes ]] || grep -q '^tag$' "$writes"; then
@@ -91,29 +102,50 @@ DEPLOYED_DIGEST=other assert_failure 'No successful development deployment' \
 TARGET_TREE=other assert_failure 'Candidate tree differs from staging' \
   "${delivery[@]}" resolve staging "$candidate"
 "${delivery[@]}" resolve staging "$candidate"
+NO_DEPLOYMENT=true "${delivery[@]}" snapshot development develop ''
+grep -Fxq "revision=$main_commit" "$GITHUB_OUTPUT"
+grep -Fxq 'digest=' "$GITHUB_OUTPUT"
+"${delivery[@]}" snapshot staging staging ''
+grep -Fxq "revision=$candidate_commit" "$GITHUB_OUTPUT"
+NO_DEPLOYMENT=true assert_failure 'Deploy to development first' \
+  "${delivery[@]}" snapshot staging staging ''
+COMPARE_STATUS=diverged assert_failure 'Commit is not in develop' \
+  "${delivery[@]}" snapshot development develop "$older_commit"
+CI_RESULT=failure assert_failure 'No successful push CI' \
+  "${delivery[@]}" snapshot development develop ''
+NO_DEPLOYMENT=true "${delivery[@]}" snapshot development develop "$older_commit"
+grep -Fxq "revision=$older_commit" "$GITHUB_OUTPUT"
 DEPLOYED_DIGEST=other assert_failure 'No successful staging deployment' \
   "${delivery[@]}" release v0.1.0 "$candidate" "$main_commit"
+TARGET_TREE=other assert_failure 'No successful staging deployment matches main HEAD' \
+  "${delivery[@]}" release v0.1.0 '' "$main_commit"
 [[ ! -s $writes ]]
-"${delivery[@]}" release v0.1.0 "$candidate" "$main_commit"
+"${delivery[@]}" release v0.1.0 '' "$main_commit"
 diff -u <(printf 'tag\ndraft\npublish\n') "$writes"
 : > "$writes"
-DRAFT_EXISTS=yes TAG_EXISTS=yes "${delivery[@]}" release v0.1.0 "$candidate" "$main_commit"
+DRAFT_EXISTS=yes TAG_EXISTS=yes "${delivery[@]}" release v0.1.0 '' "$main_commit"
 diff -u <(printf 'publish\n') "$writes"
 PROTECTED=false assert_failure 'Configure production required reviewers' \
   "${delivery[@]}" resolve production v0.1.0
 DRAFT=true TAG_EXISTS=yes assert_failure 'Expected a published stable release' \
   "${delivery[@]}" resolve production v0.1.0
 TAG_EXISTS=yes "${delivery[@]}" resolve production v0.1.0
-SSH_ORIGINAL_COMMAND="deploy $digest extra" assert_failure 'Expected deploy sha256:DIGEST' \
-  bash scripts/deploy-api.sh production
-SSH_ORIGINAL_COMMAND="deploy $digest" assert_failure 'Missing runtime setting: API_HOST_PORT' \
-  bash scripts/deploy-api.sh production < /dev/null
-SSH_ORIGINAL_COMMAND="deploy $digest" assert_failure 'Invalid runtime setting: API_HOST_PORT' \
-  bash scripts/deploy-api.sh production < <(printf '%s\0' 'PATH=/tmp')
-SSH_ORIGINAL_COMMAND="deploy $digest" assert_failure 'Invalid API_HOST_PORT' \
-  bash scripts/deploy-api.sh production < <(printf '%s\0' \
+assert_failure 'Expected sha256:DIGEST' bash scripts/deploy-api.sh production "$digest extra"
+script=$(< scripts/deploy-api.sh)
+printf -v remote_command "bash -c '%s' -- '%s' '%s'" "${script//\'/\'\\\'\'}" production "$digest"
+assert_failure 'Missing runtime setting: API_HOST_PORT' sh -c "$remote_command" < /dev/null
+assert_failure 'Invalid runtime setting: API_HOST_PORT' \
+  sh -c "$remote_command" < <(printf '%s\0' 'PATH=/tmp')
+assert_failure 'Invalid API_HOST_PORT' \
+  sh -c "$remote_command" < <(printf '%s\0' \
     'API_HOST_PORT=65536' 'CORS_ORIGIN=https://app.example.com' 'DB_HOST=db.example.com' \
     'DB_PORT=5432' 'DB_USERNAME=app' 'DB_PASSWORD=not-real' 'DB_DATABASE=acadflow' \
     'DB_SSL=true' 'JWT_SECRET=not-real' 'JWT_ACCESS_EXPIRES_IN=15m' 'I18N_FALLBACK_LANGUAGE=pt-BR')
+assert_failure 'Missing or invalid GHCR token' \
+  sh -c "$remote_command" < <(printf '%s\0' \
+    'API_HOST_PORT=3300' 'CORS_ORIGIN=https://app.example.com' 'DB_HOST=db.example.com' \
+    'DB_PORT=5432' 'DB_USERNAME=app' 'DB_PASSWORD=not-real' 'DB_DATABASE=acadflow' \
+    'DB_SSL=true' 'JWT_SECRET=not-real' 'JWT_ACCESS_EXPIRES_IN=15m' 'I18N_FALLBACK_LANGUAGE=pt-BR' \
+    'github-actions[bot]')
 
 printf 'Delivery policy tests passed.\n'
