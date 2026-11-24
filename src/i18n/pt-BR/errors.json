@@ -1,0 +1,10 @@
+{
+  "VALIDATION_ERROR": "Dados inválidos",
+  "INVALID_CREDENTIALS": "Credenciais inválidas",
+  "UNAUTHORIZED": "Não autorizado",
+  "FORBIDDEN": "Acesso negado",
+  "NOT_FOUND": "Recurso não encontrado",
+  "CONFLICT": "A operação conflita com os dados existentes",
+  "STUDENT_NOT_ENROLLED": "O aluno não está matriculado na disciplina",
+  "INTERNAL_ERROR": "Ocorreu um erro inesperado"
+}

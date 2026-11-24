@@ -1,0 +1,10 @@
+{
+  "VALIDATION_ERROR": "Invalid data",
+  "INVALID_CREDENTIALS": "Invalid credentials",
+  "UNAUTHORIZED": "Unauthorized",
+  "FORBIDDEN": "Access denied",
+  "NOT_FOUND": "Resource not found",
+  "CONFLICT": "The operation conflicts with existing data",
+  "STUDENT_NOT_ENROLLED": "The student is not enrolled in the discipline",
+  "INTERNAL_ERROR": "An unexpected error occurred"
+}

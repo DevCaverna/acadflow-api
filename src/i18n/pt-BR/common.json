@@ -1,6 +1,13 @@
 {
-  "unexpectedError": "Ocorreu um erro inesperado",
-  "unauthorized": "Não autorizado",
-  "forbidden": "Acesso negado",
-  "invalidCredentials": "Credenciais inválidas"
+  "fields": {
+    "email": "e-mail",
+    "password": "senha",
+    "name": "nome",
+    "code": "código",
+    "semester": "semestre",
+    "description": "descrição",
+    "title": "título",
+    "dueAt": "prazo",
+    "value": "nota"
+  }
 }
