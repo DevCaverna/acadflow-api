@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpStatus, Param, ParseUUIDPipe, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Put,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiErrors } from '@/common/decorators/api-errors.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
@@ -37,6 +47,26 @@ export class GradesController {
       studentId,
       value: saveGradeDto.value,
     });
+  }
+
+  @Delete('activities/:id/grades/:studentId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Auth('PROFESSOR')
+  @ApiOperation({ summary: 'Remover a nota de um aluno em uma atividade' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiErrors(
+    HttpStatus.BAD_REQUEST,
+    HttpStatus.UNAUTHORIZED,
+    HttpStatus.FORBIDDEN,
+    HttpStatus.NOT_FOUND,
+    HttpStatus.UNPROCESSABLE_ENTITY,
+  )
+  remove(
+    @CurrentUser() user: User,
+    @Param('id', ParseUUIDPipe) activityId: string,
+    @Param('studentId', ParseUUIDPipe) studentId: string,
+  ): Promise<void> {
+    return this.gradesService.remove({ professorId: user.id, activityId, studentId });
   }
 
   @Get('disciplines/:id/grades')

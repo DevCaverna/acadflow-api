@@ -50,6 +50,28 @@ export class GradesService {
     return { activityId, studentId, value };
   }
 
+  async remove({
+    professorId,
+    activityId,
+    studentId,
+  }: {
+    professorId: string;
+    activityId: string;
+    studentId: string;
+  }): Promise<void> {
+    const { disciplineId } = await this.findGradableActivity({ professorId, activityId });
+
+    await this.gradeRepository.manager.transaction(async (manager) => {
+      const enrollment = await manager.findOne(Enrollment, {
+        where: { studentId, disciplineId },
+        lock: { mode: 'pessimistic_read' },
+      });
+      if (!enrollment) throw new ApiException('STUDENT_NOT_ENROLLED');
+      const result = await manager.delete(Grade, { activityId, studentId });
+      if (!result.affected) throw new ApiException('NOT_FOUND');
+    });
+  }
+
   async findAll({
     professorId,
     disciplineId,

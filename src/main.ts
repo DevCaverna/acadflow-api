@@ -12,7 +12,7 @@ async function bootstrap(): Promise<void> {
   const config = new DocumentBuilder()
     .setTitle('AcadFlow API')
     .setDescription(
-      'API REST de gestão acadêmica do AcadFlow para professores e alunos (disciplinas, atividades, matrículas e notas). Autenticação via Bearer JWT, internacionalização via header Accept-Language (pt-BR padrão, en alternativo) e erros padronizados em ApiErrorDto.',
+      'API REST de gestão acadêmica do AcadFlow para professores e alunos (disciplinas, matrículas, atividades, anexos, notas e perfil). Autenticação via Bearer JWT, internacionalização via header Accept-Language (pt-BR padrão, en alternativo) e erros padronizados em ApiErrorDto.',
     )
     .setVersion('0.1.0')
     .addBearerAuth({
@@ -23,10 +23,12 @@ async function bootstrap(): Promise<void> {
     })
     .addTag('health', 'Verificação de saúde da API e do banco de dados')
     .addTag('auth', 'Autenticação JWT e consulta da sessão atual')
+    .addTag('users', 'Consulta e atualização do próprio perfil, senha e avatar')
     .addTag('disciplines', 'Gestão e listagem paginada de disciplinas')
-    .addTag('enrollments', 'Consulta de alunos matriculados por disciplina')
+    .addTag('enrollments', 'Consulta, matrícula e remoção manual de alunos por disciplina')
     .addTag('activities', 'Gestão de atividades vinculadas às disciplinas')
-    .addTag('grades', 'Lançamento e consulta de notas, médias e situações acadêmicas')
+    .addTag('attachments', 'Upload, listagem, URL assinada e remoção de anexos de atividades')
+    .addTag('grades', 'Lançamento, remoção e consulta de notas, médias e situações acadêmicas')
     .build();
   SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, config), {
     customSiteTitle: 'AcadFlow API — Swagger',
