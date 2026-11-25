@@ -4,7 +4,7 @@ export type GradeStatus = (typeof GRADE_STATUSES)[number];
 
 export type GradeAverage = { readonly average: number | null; readonly status: GradeStatus };
 
-const APPROVED_AVERAGE = 7;
+const APPROVED_AVERAGE = 6;
 const RECOVERY_AVERAGE = 5;
 
 export function calculateGradeAverage(values: readonly number[]): GradeAverage {
