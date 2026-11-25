@@ -4,6 +4,8 @@ Todas as mudanças notáveis da **AcadFlow API** são documentadas neste arquivo
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-25
+
 ### Adicionado
 
 - Cadastro público de professores e alunos, com sessão imediata e sem verificação de e-mail.
