@@ -8,7 +8,7 @@ Este guia cobre as operações administrativas e de armazenamento de arquivos in
 
 ## 1. Gerenciamento de Usuários via CLI (`ACA-24`)
 
-Como não há cadastro público aberto no sistema, contas administrativas ou de professores adicionais podem ser criadas via CLI fora dos seeds demo.
+A CLI permite provisionar contas de professor ou aluno fora dos seeds de demonstração, como alternativa ao cadastro público.
 
 ### Desenvolvimento
 

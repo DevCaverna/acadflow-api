@@ -8,7 +8,7 @@ Este documento consolida todas as regras de domínio do **AcadFlow**, incluindo 
 
 - Existem exclusivamente dois papéis (`Role`): `PROFESSOR` e `ALUNO`.
 - O cliente **nunca** define seu próprio papel em requisições autenticadas: a identidade vem do `sub` do JWT validado no banco em toda requisição (`JwtStrategy`).
-- No MVP, contas e matrículas são criadas via seed (`pnpm seed`). Nas branches pós-MVP (`ACA-24`), usuários também podem ser criados via CLI administrativa (`pnpm user:create`) e matrículas gerenciadas pelo professor dono da disciplina.
+- Professores e alunos podem se cadastrar sem verificação de e-mail. As contas também podem ser provisionadas via CLI (`pnpm user:create`); o seed continua disponível para demonstração. O cadastro não cria matrículas. Somente o professor dono da disciplina pode gerenciá-las.
 
 ---
 

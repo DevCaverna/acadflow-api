@@ -3,6 +3,7 @@
     "email": "email",
     "password": "password",
     "name": "name",
+    "role": "profile",
     "code": "code",
     "semester": "semester",
     "description": "description",
