@@ -1,7 +1,7 @@
 # Releases e deploy da API
 
-O GitHub Actions publica uma imagem Linux `amd64` no GHCR e promove **o mesmo digest** entre
-`development`, `staging` e `production`. Na VPS, a API usa Docker Engine diretamente, sem Compose
+O GitHub Actions publica imagens Linux `amd64` no GHCR. Os deploys em `development`, `staging`
+e `production` são independentes. Na VPS, a API usa Docker Engine diretamente, sem Compose
 e sem checkout. O PostgreSQL, os backups, o proxy, o HTTPS e o provisionamento dos hosts são
 externos ao projeto.
 
@@ -12,7 +12,8 @@ manualmente; um push ou uma execução da CI não publica nem implanta imagens p
 
 1. Proteja `main` com revisão e CI obrigatórios. Configure regras para
    impedir alteração/exclusão de tags `v*`, preservando a criação pelo workflow. Restrinja alterações
-   nos workflows de entrega a PRs revisados.
+   nos workflows de entrega a PRs revisados. Se um ruleset bloquear o push de release em `main`,
+   configure a autorização da automação de release sem desativar a proteção para alterações comuns.
 2. Em **Settings → Environments** no GitHub, crie `development`, `staging` e `production`.
    Permita deploy apenas a partir de `main` (é a ref do workflow, não a ref da imagem). Em
    `production`, configure revisores obrigatórios, impeça autoaprovação e desabilite bypass
@@ -82,31 +83,24 @@ o deploy não envia as credenciais ao contêiner. Consulte o
   Se o PostgreSQL já provisionado estiver acessível no host Docker, `DB_HOST=host.docker.internal`
   adiciona o mapeamento `host-gateway` à migration e à API. Nenhum banco é criado pelo deploy.
 
-## Publicar e promover
+## Publicar e implantar
 
-1. Abra **Deploy Snapshot** em `main` e selecione `environment=development`. Deixe
+1. Abra **Deploy Snapshot** em `main` e selecione `development` ou `staging`. Deixe
    `commit` vazio para usar o commit da execução ou informe o SHA completo de outro commit
-   de `main`. O SHA precisa ter CI verde em um push para `main`.
-   O workflow reutiliza uma imagem implantada com sucesso em `development` para esse mesmo SHA.
-   Sem uma imagem reutilizável, faz o build pelo `docker/Dockerfile`, publica no GHCR, bloqueia
-   vulnerabilidades críticas com Trivy e assina a imagem e o SBOM SPDX com Cosign/OIDC.
-2. Para homologar, execute **Deploy Snapshot** com `environment=staging` e informe o mesmo
-   SHA que passou em `development`. O workflow reutiliza o digest desse deploy; sem um
-   deployment bem-sucedido para o SHA, não há deploy nem rebuild.
-3. Execute **Create Release** em `main` com `vX.Y.Z`. Por padrão, seleciona o deploy
-   bem-sucedido mais recente em `staging`; use `candidate=COMMIT@sha256:DIGEST` para escolher
-   outro. A tag aponta para o commit homologado em `main`, que não precisa ser seu HEAD atual.
-   Para retomar uma falha parcial, reexecute o job com a mesma versão. Não retague nem
-   sobrescreva uma versão publicada.
-4. Para produção, execute **Deploy Release** em `main` e informe a versão
-   `vX.Y.Z`. Confira o digest no resumo do job de verificação. Antes de aprovar, confirme
+   de `main` com CI verde. O workflow reutiliza uma imagem assinada para o mesmo SHA ou faz
+   o build, executa o Trivy e assina a imagem e o SBOM SPDX. Não precisa de deploy prévio.
+2. Execute **Create Release** em `main` com `X.Y.Z`, por exemplo `0.2.0`. O workflow exige
+   CI verde para o commit de origem, versão crescente e notas em `[Unreleased]`. Atualiza
+   `package.json`, move as notas para a seção datada no `CHANGELOG.md` e constrói e assina
+   a imagem do commit de release. Depois, publica o commit em `main`, a tag `vX.Y.Z` e a
+   GitHub Release com as notas. Não consulta deploys nem aciona um deploy. Para recuperar
+   uma falha parcial, use **Re-run failed jobs** na mesma execução. Não mova uma tag publicada.
+3. Para produção, execute **Deploy Release** em `main` e informe `X.Y.Z`. O workflow
+   usa o digest assinado registrado na release, sem rebuild ou deploy anterior em staging.
+   Antes de aprovar, confirme
    o banco de destino, um backup recente com caminho de restauração conhecido e a compatibilidade
    do esquema com a versão que ficará no ar durante a migration. O histórico de deployments
    guarda ambiente, versão, digest e resultado (task `acadflow-image`).
-
-Na primeira execução após a migração, comece em `development` com um commit de `main` que
-tenha CI verde, depois promova esse SHA para `staging`. Snapshots antigos sem CI de push em
-`main` para o SHA registrado não são candidatos a novas releases.
 
 ## Falhas e rollback
 

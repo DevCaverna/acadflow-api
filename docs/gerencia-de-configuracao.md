@@ -36,12 +36,12 @@ Este documento formaliza o **Plano de Gerência de Configuração de Software** 
 
 ### 2.2 Linhas de Base (Baselines)
 
-| Baseline                    | Origem                      | Critério de Congelamento                              | Uso                                                    |
-| --------------------------- | --------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |
-| **Baseline de Design**      | `acadflow-design` (`main`)  | PR revisado (`v1.0` → `v1.3`)                         | Referência visual, tokens e regras de domínio          |
-| **Baseline de Integração**  | Commit de `main`            | PR revisado + `API / Validate` e `API / Build` verdes | Snapshot em `development`                              |
-| **Baseline de Homologação** | Deployment em `development` | Mesmo commit e digest implantados em `staging`        | Validação pré-produção                                 |
-| **Baseline de Produção**    | Release `vX.Y.Z`            | Digest homologado em `staging` + aprovação humana     | Imagem assinada por digest + migration aplicada + SBOM |
+| Baseline                    | Origem                     | Critério de Congelamento                              | Uso                                                    |
+| --------------------------- | -------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |
+| **Baseline de Design**      | `acadflow-design` (`main`) | PR revisado (`v1.0` → `v1.3`)                         | Referência visual, tokens e regras de domínio          |
+| **Baseline de Integração**  | Commit de `main`           | PR revisado + `API / Validate` e `API / Build` verdes | Snapshot em `development`                              |
+| **Baseline de Homologação** | Commit de `main`           | Snapshot assinado implantado em `staging`             | Validação pré-produção                                 |
+| **Baseline de Produção**    | Release `vX.Y.Z`           | Digest assinado da release + aprovação humana         | Imagem assinada por digest + migration aplicada + SBOM |
 
 ### 2.3 Versionamento Semântico (`SemVer 2.0.0`)
 
@@ -62,8 +62,8 @@ flowchart LR
     Issue["Issue Linear ACA-*"] --> Feat["Branch temporária a partir de main"]
     Feat --> PRMain["PR + CI + CODEOWNERS → main"]
     PRMain --> SnapDev["Deploy Snapshot (development)"]
-    SnapDev --> SnapStg["Deploy Snapshot (staging, mesmo SHA e digest)"]
-    SnapStg --> Rel["Create Release vX.Y.Z"]
+    PRMain --> SnapStg["Deploy Snapshot (staging)"]
+    PRMain --> Rel["Create Release (X.Y.Z)"]
     Rel --> Prod["Deploy Release (production, com aprovação)"]
 ```
 
@@ -75,7 +75,7 @@ flowchart LR
 4. **Proteção de branches e tags:** configure `main` para exigir PR e CI verde; proteja tags `v*` contra alteração e exclusão.
 5. **Dependências sob controle:** o [.github/dependabot.yml](../.github/dependabot.yml) abre PRs semanais para `npm` (`pnpm`), `docker` e `github-actions` contra `main`, sempre passando pelo CI completo.
 
-Hotfixes partem de `main` e seguem o mesmo fluxo de promoção, normalmente com uma release patch.
+Hotfixes partem de `main` e normalmente geram uma release patch.
 
 ---
 
@@ -89,7 +89,7 @@ A rastreabilidade ponta a ponta permite responder em qualquer momento **qual ver
 
 | Aspecto                | Local (Host / Compose Dev)              | `development`                               | `staging`                                   | `production`                                 |
 | ---------------------- | --------------------------------------- | ------------------------------------------- | ------------------------------------------- | -------------------------------------------- |
-| Origem do código       | `main` ou branch temporária             | Commit de `main`                            | Mesmo commit e digest de `development`      | Release `vX.Y.Z` do digest de `staging`      |
+| Origem do código       | `main` ou branch temporária             | Commit de `main`                            | Commit de `main`                            | Release `vX.Y.Z`                             |
 | Banco PostgreSQL 17    | Local ou container `postgres:17-alpine` | Banco exclusivo `development`               | Banco exclusivo `staging`                   | Banco exclusivo `production` + backup prévio |
 | Execução de migrations | Manual (`pnpm migration:run`)           | Automática antes da troca (`deploy-api.sh`) | Automática antes da troca (`deploy-api.sh`) | Automática após confirmação de backup        |
 | `pnpm seed`            | Permitido (`SEED_PASSWORD`)             | Não executado no deploy                     | Bloqueado se `NODE_ENV=production`          | Bloqueado por código (`NODE_ENV=production`) |
@@ -118,7 +118,7 @@ Verifica antes da promoção/release que o artefato entregue corresponde exatame
 
 - [ ] Dependências instaladas com `pnpm install --frozen-lockfile` (sem deriva de versões).
 - [ ] Build reproduzido via `docker/Dockerfile` com `tsc-alias` resolvido em `dist/` e arquivos `i18n` copiados.
-- [ ] Mesmo commit e digest `sha256` promovidos entre `development` → `staging` → `production`.
+- [ ] O digest `sha256` implantado corresponde ao snapshot selecionado ou à release publicada.
 - [ ] Scan **Trivy** sem vulnerabilidades críticas bloqueantes.
 - [ ] Assinatura criptográfica **Cosign / OIDC** e **SBOM SPDX** anexados à imagem no GHCR.
 - [ ] Consistência entre tag `vX.Y.Z`, registro em [CHANGELOG.md](../CHANGELOG.md) e estado das migrations (`migration:show`).
