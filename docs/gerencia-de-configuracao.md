@@ -7,7 +7,7 @@ Este documento formaliza o **Plano de Gerência de Configuração de Software** 
 ## 1. Objetivo, Escopo e Papéis (CCB)
 
 - **Escopo:** cobre todos os artefatos versionados de `DevCaverna/acadflow-api` e sua integração por contrato HTTP/design com `DevCaverna/acadflow-web` e `DevCaverna/acadflow-design`.
-- **Comitê de Controle de Mudanças (CCB):** atua por meio da revisão obrigatória de Pull Requests por código-proprietários (`.github/CODEOWNERS`), checks automáticos do GitHub Actions e aprovação manual explícita no Environment `production` (com autoaprovação bloqueada).
+- **Comitê de Controle de Mudanças (CCB):** atua por meio da revisão obrigatória de Pull Requests por código-proprietários (`.github/CODEOWNERS`), checks automáticos do GitHub Actions e aprovação manual quando configurada no Environment `production`.
 
 | Papel no Projeto                         | Responsável (GitHub) | Atuação em GCS                                                        |
 | ---------------------------------------- | -------------------- | --------------------------------------------------------------------- |
@@ -41,7 +41,7 @@ Este documento formaliza o **Plano de Gerência de Configuração de Software** 
 | **Baseline de Design**      | `acadflow-design` (`main`) | PR revisado (`v1.0` → `v1.3`)                         | Referência visual, tokens e regras de domínio          |
 | **Baseline de Integração**  | Commit de `main`           | PR revisado + `API / Validate` e `API / Build` verdes | Snapshot em `development`                              |
 | **Baseline de Homologação** | Commit de `main`           | Snapshot assinado implantado em `staging`             | Validação pré-produção                                 |
-| **Baseline de Produção**    | Release `vX.Y.Z`           | Digest assinado da release + aprovação humana         | Imagem assinada por digest + migration aplicada + SBOM |
+| **Baseline de Produção**    | Release `vX.Y.Z`           | Digest assinado da release                            | Imagem assinada por digest + migration aplicada + SBOM |
 
 ### 2.3 Versionamento Semântico (`SemVer 2.0.0`)
 
@@ -64,7 +64,7 @@ flowchart LR
     PRMain --> SnapDev["Deploy Snapshot (development)"]
     PRMain --> SnapStg["Deploy Snapshot (staging)"]
     PRMain --> Rel["Create Release (X.Y.Z)"]
-    Rel --> Prod["Deploy Release (production, com aprovação)"]
+    Rel --> Prod["Deploy Release (production)"]
 ```
 
 ### 3.2 Regras de Controle Aplicadas
@@ -94,7 +94,7 @@ A rastreabilidade ponta a ponta permite responder em qualquer momento **qual ver
 | Execução de migrations | Manual (`pnpm migration:run`)           | Automática antes da troca (`deploy-api.sh`) | Automática antes da troca (`deploy-api.sh`) | Automática após confirmação de backup        |
 | `pnpm seed`            | Permitido (`SEED_PASSWORD`)             | Não executado no deploy                     | Bloqueado se `NODE_ENV=production`          | Bloqueado por código (`NODE_ENV=production`) |
 | `CORS_ORIGIN`          | `http://localhost:5173`                 | Origem pública Web `development`            | Origem pública Web `staging`                | Origem pública Web `production`              |
-| Aprovação humana       | N/A                                     | Acionamento manual                          | Acionamento manual                          | Obrigatória sem autoaprovação                |
+| Aprovação humana       | N/A                                     | Acionamento manual                          | Acionamento manual                          | Conforme regras do Environment               |
 | Rollback rápido        | `git` / `docker compose down`           | Contêiner `-previous` na VPS                | Contêiner `-previous` na VPS                | Contêiner `-previous` se schema compatível   |
 
 ---

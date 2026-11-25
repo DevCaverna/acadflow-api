@@ -16,9 +16,9 @@ manualmente; um push ou uma execução da CI não publica nem implanta imagens p
    configure a autorização da automação de release sem desativar a proteção para alterações comuns.
 2. Em **Settings → Environments** no GitHub, crie `development`, `staging` e `production`.
    Permita deploy apenas a partir de `main` (é a ref do workflow, não a ref da imagem). Em
-   `production`, configure revisores obrigatórios, impeça autoaprovação e desabilite bypass
-   administrativo. O workflow recusa produção sem revisores ou se o solicitante puder
-   autoaprovar. Não disponibilize chaves SSH no nível do repositório.
+   `production`, recomenda-se configurar revisores obrigatórios, impedir autoaprovação
+   e desabilitar o bypass administrativo. O GitHub aplica as regras configuradas no
+   Environment; o workflow não exige revisores. Não disponibilize chaves SSH no nível do repositório.
 3. Em cada Environment, configure as variables e secrets da tabela abaixo. Na mesma VPS,
    `DEPLOY_HOST`, `DEPLOY_PORT` e `DEPLOY_KNOWN_HOSTS` podem ser iguais; use uma chave SSH,
    uma porta HTTP local e um banco distintos por ambiente.
@@ -97,7 +97,7 @@ o deploy não envia as credenciais ao contêiner. Consulte o
    uma falha parcial, use **Re-run failed jobs** na mesma execução. Não mova uma tag publicada.
 3. Para produção, execute **Deploy Release** em `main` e informe `X.Y.Z`. O workflow
    usa o digest assinado registrado na release, sem rebuild ou deploy anterior em staging.
-   Antes de aprovar, confirme
+   Antes de implantar, confirme
    o banco de destino, um backup recente com caminho de restauração conhecido e a compatibilidade
    do esquema com a versão que ficará no ar durante a migration. O histórico de deployments
    guarda ambiente, versão, digest e resultado (task `acadflow-image`).
