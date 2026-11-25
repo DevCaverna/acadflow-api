@@ -4,6 +4,8 @@ Todas as mudanças notáveis da **AcadFlow API** são documentadas neste arquivo
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-25
+
 ### Adicionado
 
 - Documentação completa da API: arquitetura real com diagramas Mermaid, dicionário de dados em [docs/banco-de-dados.md](docs/banco-de-dados.md), ADRs (`docs/adr/`), regras de negócio e matriz RBAC ([docs/regras-de-negocio.md](docs/regras-de-negocio.md)), guia de segurança ([docs/seguranca.md](docs/seguranca.md)), guia de Swagger ([docs/swagger.md](docs/swagger.md)), guia de storage/operação ([docs/storage-e-operacao.md](docs/storage-e-operacao.md)), guia full-stack local ([docs/execucao/fullstack-local.md](docs/execucao/fullstack-local.md)) e coleção HTTP ([docs/http/acadflow-api.http](docs/http/acadflow-api.http)).
