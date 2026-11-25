@@ -4,6 +4,7 @@ import { compare, hash } from 'bcryptjs';
 import { Repository } from 'typeorm';
 import { isUniqueViolation } from '@/common/database/postgres-error';
 import { ApiException } from '@/common/filters/api.exception';
+import type { Role } from '@/common/types/role';
 import { BCRYPT_ROUNDS } from '@/config/security.constants';
 import { AvatarsService } from '@/modules/users/avatars.service';
 import type { ChangePasswordDto } from '@/modules/users/dto/change-password.dto';
@@ -20,6 +21,32 @@ export class UsersService {
 
   findById({ id }: { id: string }): Promise<User | null> {
     return this.userRepository.findOneBy({ id });
+  }
+
+  async createAccount({
+    name,
+    email,
+    role,
+    password,
+  }: {
+    name: string;
+    email: string;
+    role: Role;
+    password: string;
+  }): Promise<User> {
+    const user = this.userRepository.create({
+      name,
+      email: email.toLowerCase(),
+      role,
+      passwordHash: await hash(password, BCRYPT_ROUNDS),
+      avatarKey: null,
+    });
+    try {
+      return await this.userRepository.save(user);
+    } catch (error: unknown) {
+      if (isUniqueViolation(error)) throw new ApiException('EMAIL_ALREADY_IN_USE');
+      throw error;
+    }
   }
 
   findByEmailWithPassword({ email }: { email: string }): Promise<User | null> {

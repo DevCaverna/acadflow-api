@@ -5,6 +5,7 @@
   "FORBIDDEN": "Access denied",
   "NOT_FOUND": "Resource not found",
   "CONFLICT": "The operation conflicts with existing data",
+  "EMAIL_ALREADY_IN_USE": "This email is already in use",
   "STUDENT_NOT_ENROLLED": "The student is not enrolled in the discipline",
   "INTERNAL_ERROR": "An unexpected error occurred",
   "INVALID_CURRENT_PASSWORD": "Current password is incorrect",

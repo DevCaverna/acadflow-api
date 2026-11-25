@@ -36,6 +36,7 @@ Este documento descreve os controles de segurança implementados na **AcadFlow A
 ## 5. Infraestrutura, Runtime e Cadeia de Entrega
 
 - **CORS explícito:** configurado em `src/main.ts` a partir de `CORS_ORIGIN` (padrão local `http://localhost:5173`), devendo apontar para a origem HTTPS pública do frontend em staging/produção.
+- **Cadastro público:** o perfil e o e-mail são autodeclarados. Use um canal conhecido para confirmar a identidade de um aluno antes de matricular sua conta. Não há verificação nem recuperação de senha por e-mail.
 - **Seeds bloqueados em produção:** `src/database/seeds/run-seed.ts` recusa execução se `NODE_ENV === 'production'`.
 - **Migrations fora do startup:** `synchronize: false` e `migrationsRun: false` evitam mutação de esquema durante o boot de réplicas; migrations produtivas rodam em etapa isolada antes da troca do container (`scripts/deploy-api.sh`).
 - **Container sem root:** a imagem de produção (`docker/Dockerfile`) executa o processo Node.js com `USER node` (não root) e banco de testes em `docker/compose.test.yml` roda em `tmpfs` sem expor porta no host.

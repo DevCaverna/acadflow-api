@@ -86,7 +86,7 @@ Todas são do professor responsável. Não há exclusão em cascata.
 
 ## Pós-MVP
 
-- **Cadastro público:** `POST /auth/register`, que cria somente `ALUNO`. No MVP, as contas vêm de seed.
+- **Cadastro público:** `POST /auth/register` recebe `{ name, email, password, role }`, com `role` igual a `ALUNO` ou `PROFESSOR`. Retorna `201 Session` (mesmo formato do login). O perfil é autodeclarado, não há verificação de e-mail e a conta nasce sem matrículas. O nome e o e-mail são aparados; o e-mail é único sem distinguir maiúsculas. A senha tem no mínimo 8 caracteres e no máximo 72 bytes. E-mail em uso retorna `409 EMAIL_ALREADY_IN_USE`. Após cinco tentativas com dados válidos em 15 minutos por IP, retorna `429 TOO_MANY_REQUESTS`; o limite é separado do login e fica em memória por instância.
 - **Matrículas manuais** (professor responsável): `GET /disciplines/:id/students/candidates?search=` (mínimo 3 letras, até 10 alunos não matriculados), `POST /disciplines/:id/students/:studentId` (`201`; repetida `409`) e `DELETE` na mesma rota (`204`; com notas na disciplina `409`).
 - **Login:** depois de 5 tentativas em 15 minutos por e-mail e IP, `429 TOO_MANY_REQUESTS`. O login correto zera a contagem, que fica em memória em cada instância.
 - **Perfil:** `GET` e `PATCH /users/me` (`{ name?, email? }`, `200 User`; e-mail em uso retorna `409`) e `PATCH /users/me/password` (`{ currentPassword, newPassword }`, `204`). Senha de 8 caracteres a 72 bytes. O papel nunca é editável.

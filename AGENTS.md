@@ -85,12 +85,12 @@ findAll(
 
 ## 4. Regras de negócio e segurança
 
-- Os únicos papéis são `PROFESSOR` e `ALUNO`. No MVP, contas e matrículas são criadas por seed. O cadastro público é pós-MVP e só poderá criar `ALUNO`; professor, só por seed ou processo autorizado.
+- Os únicos papéis são `PROFESSOR` e `ALUNO`. O cadastro público permite escolher qualquer um deles, sem verificação de e-mail. O perfil é autodeclarado e a conta nasce sem matrículas.
 - Um professor só gerencia suas disciplinas; um aluno só consulta disciplinas em que está matriculado e suas próprias notas.
 - Matrícula é única por `(studentId, disciplineId)` e nota é única por `(studentId, activityId)`; usar constraints no PostgreSQL e validações no serviço.
 - Nota no intervalo **0 a 10**; média aritmética das notas efetivamente lançadas, arredondada uma única vez para uma casa decimal antes de classificar. Sem notas: `NO_GRADES` e média `null`.
 - Média `>= 7`: `APPROVED`; `>= 5` e `< 7`: `RECOVERY`; `< 5`: `FAILED`. **O design existente define os limites**, não assumir aprovação a partir de 6.
-- Não confiar no papel ou identificador enviado pelo cliente para decidir autorização. Verificar JWT, ownership e matrícula no backend.
+- Fora da escolha de perfil no cadastro, não confiar no papel ou identificador enviado pelo cliente para decidir autorização. Verificar JWT, perfil persistido, ownership e matrícula no backend.
 - Senhas somente como hash bcrypt; nunca retorná-las. Erro de login genérico e mensagens de erro estruturadas com `code` estável.
 - O modelo do MVP tem cinco tabelas: `users`, `disciplines`, `enrollments`, `activities` e `grades`. Perfil completo, R2/Sharp, anexos, matrículas manuais e notificações são pós-MVP.
 

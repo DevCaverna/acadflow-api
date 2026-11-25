@@ -5,6 +5,7 @@
   "FORBIDDEN": "Acesso negado",
   "NOT_FOUND": "Recurso não encontrado",
   "CONFLICT": "A operação conflita com os dados existentes",
+  "EMAIL_ALREADY_IN_USE": "Este e-mail já está em uso",
   "STUDENT_NOT_ENROLLED": "O aluno não está matriculado na disciplina",
   "INTERNAL_ERROR": "Ocorreu um erro inesperado",
   "INVALID_CURRENT_PASSWORD": "Senha atual incorreta",
